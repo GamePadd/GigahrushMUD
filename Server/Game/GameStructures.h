@@ -20,20 +20,8 @@ namespace Gigahrush {
 
 	struct RoomDesc {
 		int ID;
-		std::string desc;
 		std::vector<std::string> itemDescs; // Шаблон для описания положений предметов в комнате
 		std::vector<std::string> enemiesDescs; // Шаблон для описания положений врагов в комнате
-	};
-
-	struct ItemDesc {
-		int ID;
-		std::string desc;
-	};
-
-	struct EnemyDesc {
-		int ID;
-		std::string desc;
-		std::vector<std::string> replics; //Рандомные реплики определенного врага
 	};
 
 	struct Craft {
@@ -55,6 +43,7 @@ namespace Gigahrush {
 			std::string name;
 			std::string description;
 			Location location;
+			std::vector<std::string> replics; //Рандомные реплики определенного врага
 			unsigned short int health;
 			unsigned short int attack;
 
@@ -69,6 +58,8 @@ namespace Gigahrush {
 			std::string useDescription;
 			Type type;
 			bool canSpawn;
+
+			Item(int, std::string, std::string, std::string, Type, bool);
 
 			//std::string use(Player&);
 	};

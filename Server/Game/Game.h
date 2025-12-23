@@ -1,12 +1,11 @@
 #include "GameStructures.h"
+#include "JsonParser.h"
 
 namespace Gigahrush {
 	struct Config {
 		MapSize mapSize;
 
 		std::vector<RoomDesc> roomDescs;
-		std::vector<ItemDesc> itemDescs;
-		std::vector<EnemyDesc> enemyDescs;
 
 		std::vector<Craft> crafts;
 
@@ -24,6 +23,9 @@ namespace Gigahrush {
 			Config config;
 
 			void LoadConfig();
+		private:
+			void LoadMapSize();
+			void LoadItems();
 	};
 
 	class Game {

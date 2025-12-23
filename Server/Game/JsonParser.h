@@ -12,6 +12,7 @@ namespace Gigahrush {
 
 		JSONParser(JSONParser const&) = delete;
 		JSONParser& operator= (JSONParser const&) = delete;
+
 	public:
 		static JSONParser& Instance();
 		nlohmann::json readFile(std::string);
