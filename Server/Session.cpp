@@ -21,8 +21,6 @@ void Session::read() {
 				std::cout << "Data: ";
 				std::cout.write(self->buffer.data(), bytes_received);
 				std::cout << std::endl;
-				std::string test(self->buffer.data(), bytes_received);
-				if (test == "•“‰") { std::cout << "ANANANANANANANA"; }
 
 				asio::write(self->socket, asio::buffer(self->buffer.data(), bytes_received));
 				self->read();
