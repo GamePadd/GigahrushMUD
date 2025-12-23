@@ -37,19 +37,6 @@ namespace Gigahrush {
 		int F;
 	};
 
-	class Enemy {
-		public:
-			int ID;
-			std::string name;
-			std::string description;
-			Location location;
-			std::vector<std::string> replics; //–андомные реплики определенного врага
-			unsigned short int health;
-			unsigned short int attack;
-
-			//std::string attack(Player&);
-	};
-
 	class Item {
 		public:
 			int ID;
@@ -60,8 +47,26 @@ namespace Gigahrush {
 			bool canSpawn;
 
 			Item(int, std::string, std::string, std::string, Type, bool);
+			~Item();
 
 			//std::string use(Player&);
+	};
+
+	class Enemy {
+		public:
+			int ID;
+			std::string name;
+			std::string description;
+			//Location location;
+			std::vector<std::string> replics; //–андомные реплики определенного врага
+			unsigned short int health;
+			unsigned short int attack;
+			std::vector<Item> loot;
+
+			Enemy(int, std::string, std::string, std::vector<std::string>, unsigned short int, unsigned short int, std::vector<Item>);
+			~Enemy();
+
+			//std::string attack(Player&);
 	};
 
 	struct Player {

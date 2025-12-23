@@ -9,27 +9,27 @@
 [
 	{
 		"id" : 1,
-		"name" : "Крутой предмет",
-		"description" : "Ахуенное описание",
-		"useDescription" : "Невьебенное использование",
+		"name" : "Предмет1",
+		"description" : "Описание1",
+		"useDescription" : "Использование1",
 		"type" : 0,
 		"canSpawn" : true,
 		"spawnChance" : 0.5
 	},
 	{
 		"id" : 2,
-		"name" : "Крутой предмет 2",
-		"description" : "Ахуенное описание 2",
-		"useDescription" : "Невьебенное использование 2",
+		"name" : "Предмет2",
+		"description" : "Описание2",
+		"useDescription" : "Использование2",
 		"type" : 0,
 		"canSpawn" : true,
 		"spawnChance" : 0.2
 	},
 	{
 		"id" : 3,
-		"name" : "Крутой предмет 3",
-		"description" : "Ахуенное описание 3",
-		"useDescription" : "Невьебенное использование 3",
+		"name" : "Предмет3",
+		"description" : "Описание3",
+		"useDescription" : "Использование3",
 		"type" : 1,
 		"canSpawn" : false,
 		"spawnChance" : 0.2
@@ -43,7 +43,7 @@
 	{
 		"id" : 1,
 		"name" : "Крутой враг",
-		"description" : "Ахуенный враг",
+		"description" : "Описание врага",
 		"replics" : ["реплика1","реплика2"],
 		"health" : 100,
 		"attack" : 15,
@@ -53,7 +53,7 @@
 	{
 		"id" : 2,
 		"name" : "Крутой враг 2",
-		"description" : "Ахуенный враг 2",
+		"description" : "Описание врага",
 		"replics" : ["реплика1","реплика2"],
 		"health" : 100,
 		"attack" : 15,
@@ -80,9 +80,9 @@
 		"description" : "хуйня комната",
 		"itemDescs" : ["Описание1","Описание2"],
 		"enemiesDescs" : ["Описание1","Описание2"],
-		"isExit" : false
+		"isExit" : false,
 		"spawnChance" : 0.5
-	},
+	}
 ]
 
 ### Crafts.json

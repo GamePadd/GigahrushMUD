@@ -26,6 +26,9 @@ namespace Gigahrush {
 		private:
 			void LoadMapSize();
 			void LoadItems();
+			void LoadEnemies();
+			void LoadRooms();
+			void LoadCrafts();
 	};
 
 	class Game {
