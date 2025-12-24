@@ -163,4 +163,11 @@ namespace Gigahrush {
 		std::vector<Room*> rooms;
 		Location exitCoordinates;
 	};
+
+	//GameData
+
+	struct GameData {
+		std::vector<Floor> floors;
+		std::vector<Player> players;
+	};
 }

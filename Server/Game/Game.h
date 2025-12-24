@@ -33,7 +33,23 @@ namespace Gigahrush {
 	};
 
 	class Game {
+		private:
+			Game() {};
+			~Game() {};
+
+			Game(Game& const) = delete;
+			Game& operator= (Game const&) = delete;
+
+			void GenerateFloors();
+			void GenerateRoom();
+			void GenerateItemsAndEnemies();
+
 		public:
 			Configurator configurator;
+			GameData gamedata;
+
+			static Game& Instance();
+			
+			void GenerateGame();
 	};
 }

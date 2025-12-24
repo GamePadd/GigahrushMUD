@@ -219,9 +219,18 @@ namespace Gigahrush {
 		count = 1;
 
 		for (auto& it : config.rooms) {
+
+			float spc = 0.0f;
+			for (auto spawnchance : config.roomSpawnChances) {
+				if (spawnchance.ID == it->ID) {
+					spc = spawnchance.chance;
+					break;
+				}
+			}
+
 			std::cout << "# Room " << count << "\n\n";
 
-			std::cout << "ID: " << it->ID << "\nName: " << it->name << "\nDescription: " << it->description << std::endl;
+			std::cout << "ID: " << it->ID << "\nName: " << it->name << "\nDescription: " << it->description << "\nSpawn chance: " << spc << "\n";
 			for (auto ds : config.roomDescs) {
 				if (ds.ID == it->ID) {
 					std::cout << "\n--- Item description: ---\n\n";
@@ -246,6 +255,14 @@ namespace Gigahrush {
 
 		for (auto it : config.crafts) {
 			std::cout << "# Craft " << count << "\n\n";
+
+			std::string craftName = "Unknown item";
+			for (auto& tt : config.items) {
+				if (tt->ID == it.ID) {
+					craftName = tt->name;
+				}
+			}
+			std::cout << "Item name: " << craftName << "\n";
 			std::cout << "ID: " << it.ID << "\nCraft: ";
 			for (int i = 0; i < it.craft.size(); i++) {
 				std::string name = "Unknown ID";
@@ -272,5 +289,26 @@ namespace Gigahrush {
 		std::cout << "Config loaded!\n\n";
 
 		ShowAllConfig();
+	}
+
+	Game& Game::Instance() {
+		static Game g;
+		return g;
+	}
+
+	void Game::GenerateItemsAndEnemies() {
+
+	}
+
+	void Game::GenerateRoom() {
+
+	}
+
+	void Game::GenerateFloors() {
+
+	}
+
+	void Game::GenerateGame() {
+
 	}
 }

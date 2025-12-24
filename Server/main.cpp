@@ -7,7 +7,7 @@
 int main()
 {
 	setlocale(LC_ALL, "ru_RU.utf8");
-	Gigahrush::Game Game;
+	Gigahrush::Game& Game = Gigahrush::Game::Instance();
 	Game.configurator.LoadConfig();
 
 	asio::io_context io_context;
