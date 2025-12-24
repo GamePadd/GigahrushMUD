@@ -58,7 +58,7 @@ namespace Gigahrush {
 		}
 
 		std::cout << "=== Items loaded ===" << std::endl;
-		std::cout << "Items count: " << config.items.size() << std::endl << std::endl;
+		std::cout << "Items count: " << config.items.size() << std::endl;
 
 	}
 
@@ -91,7 +91,7 @@ namespace Gigahrush {
 		}
 
 		std::cout << "=== Enemies loaded ===" << std::endl;
-		std::cout << "Enemies count: " << config.enemies.size() << std::endl << std::endl;
+		std::cout << "Enemies count: " << config.enemies.size() << std::endl;
 	}
 
 	void Configurator::LoadRooms() {
@@ -103,10 +103,13 @@ namespace Gigahrush {
 			config.rooms.push_back(std::make_unique<Room>(
 				RoomsConfig[i]["id"],
 				RoomsConfig[i]["name"],
-				std::vector<std::string>{RoomsConfig[i]["description"]},
+				std::string{RoomsConfig[i]["description"]},
+				std::vector<RoomDescElement>{},
+				std::vector<RoomDescElement>{},
 				std::vector<std::unique_ptr<Item>>{},
 				std::vector<std::unique_ptr<Enemy>>{},
-				RoomsConfig[i]["isExit"]
+				RoomsConfig[i]["isExit"],
+				Location()
 			));
 
 			config.roomDescs.push_back(RoomDesc(
@@ -117,7 +120,7 @@ namespace Gigahrush {
 			config.roomSpawnChances.push_back(SpawnChance(RoomsConfig[i]["id"], RoomsConfig[i]["spawnChance"]));
 		}
 		std::cout << "=== Rooms loaded ===" << std::endl;
-		std::cout << "Rooms count: " << config.rooms.size() << std::endl << std::endl;
+		std::cout << "Rooms count: " << config.rooms.size() << std::endl;
 	}
 
 	void Configurator::LoadCrafts() {
@@ -137,8 +140,10 @@ namespace Gigahrush {
 	}
 
 	void Configurator::ShowAllConfig() {
-		std::cout << "All game config: \n";
+		std::cout << "=== All game config: ===\n\n";
 		//MapSize
+
+		std::cout << "=== Base settings: ===\n\n";
 
 		std::cout << "Map Size: \n";
 		std::cout << "FloorCount: " << config.mapSize.FloorCount << std::endl;
@@ -147,37 +152,111 @@ namespace Gigahrush {
 
 		//Items
 		
-		std::cout << "All items: \n";
+		std::cout << "=== All items: === \n\n";
 		
+		std:size_t count = 1;
+
 		for (auto& it : config.items) {
-			std::cout << "ID: " << it->ID << "\nName: " << it->name << "\nDescription: " << it->description << std::endl;
+
+			float spc = 0.0f;
+			for (auto spawnchance : config.itemSpawnChances) {
+				if (spawnchance.ID == it->ID) {
+					spc = spawnchance.chance;
+					break;
+				}
+			}
+
+			std::cout << "# Item " << count << "\n\n";
+
+			std::cout << "ID: " << it->ID << "\nName: " << it->name << "\nDescription: " 
+				<< it->description  << "\nSpawn chance: " << spc << "\nCan spawn: " << it->canSpawn << "\n\n";
+			++count;
 		}
 
 		//Enemies
 		
-		std::cout << "All enemies: \n";
+		std::cout << "=== All enemies: ===\n\n";
+
+		count = 1;
 
 		for (auto& it : config.enemies) {
-			std::cout << "ID: " << it->ID << "\nName: " << it->name << "\nDescription: " << it->description << "\nHealth: " << it->health << "\nAttack: " << it->attack << std::endl;
+
+			float spc = 0.0f;
+			for (auto spawnchance : config.enemySpawnChances) {
+				if (spawnchance.ID == it->ID) {
+					spc = spawnchance.chance;
+					break;
+				}
+			}
+
+			std::cout << "# Enemy " << count << "\n\n";
+
+			std::cout << "ID: " << it->ID << "\nName: " << it->name << "\nDescription: "
+				<< it->description << "\nHealth: "
+				<< it->health << "\nAttack: "
+				<< it->attack << "\nSpawn chance: " << spc << "\n\n";
+
+			std::cout << "--- Replics: ---\n\n";
+
+			std::size_t count2 = 1;
+			for (auto r : it->replics) {
+				std::cout << count2 << r << "\n";
+				++count2;
+			}
+
+			std::cout << "\n--- Loot: ---\n\n";
+			for (auto &r : it->loot) {
+				std::cout << r->name << "\n";
+			}
+			std::cout << "\n";
+			++count;
 		}
 
 		//Rooms
 		
-		std::cout << "All rooms: \n";
+		std::cout << "=== All rooms: ===\n\n";
+
+		count = 1;
 
 		for (auto& it : config.rooms) {
-			std::cout << "ID: " << it->ID << "\nName: " << it->name << "\nDescription: " << it->description[0] << std::endl;
+			std::cout << "# Room " << count << "\n\n";
+
+			std::cout << "ID: " << it->ID << "\nName: " << it->name << "\nDescription: " << it->description << std::endl;
+			for (auto ds : config.roomDescs) {
+				if (ds.ID == it->ID) {
+					std::cout << "\n--- Item description: ---\n\n";
+					for (auto ids : ds.itemDescs) {
+						std::cout << ids << "\n";
+					}
+					std::cout << "\n--- Enemy description: ---\n\n";
+					for (auto eds : ds.enemiesDescs) {
+						std::cout << eds << "\n";
+					}
+				}
+			}
+			std::cout << "\n";
+			++count;
 		}
 
 		//Crafts
 
-		std::cout << "All crafts: \n";
+		std::cout << "All crafts: \n\n";
+
+		count = 1;
 
 		for (auto it : config.crafts) {
+			std::cout << "# Craft " << count << "\n\n";
 			std::cout << "ID: " << it.ID << "\nCraft: ";
 			for (int i = 0; i < it.craft.size(); i++) {
-				std::cout << it.craft[i] << " ";
+				std::string name = "Unknown ID";
+				for (auto& tt : config.items) {
+					if (tt->ID == it.craft[i]) {
+						name = tt->name;
+					}
+				}
+				std::cout << name << ", ";
 			}
+			++count;
 		}
 	}
 
@@ -190,7 +269,7 @@ namespace Gigahrush {
 		LoadRooms();
 		LoadCrafts();
 
-		std::cout << "Config loaded!" << std::endl;
+		std::cout << "Config loaded!\n\n";
 
 		ShowAllConfig();
 	}
