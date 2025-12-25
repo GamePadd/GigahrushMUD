@@ -1,5 +1,6 @@
 ﻿#include <locale>
 #include <codecvt>
+#include "audiere.h"
 
 #include "asio.hpp"
 #include "Client.h"
@@ -53,7 +54,11 @@ int main()
 	char ip[] = "localhost";
 	char port[] = "15001";
 
+	audiere::AudioDevicePtr device = audiere::OpenDevice();
+	audiere::SoundEffect* sound = audiere::OpenSoundEffect(device, "bulba.mp3", audiere::SINGLE);
+
 	while (running) {
+		sound->play();
 		asio::io_context io_context;
 
 		try {

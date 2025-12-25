@@ -663,7 +663,7 @@ namespace Gigahrush {
 		room->location = loc;
 
 		GenerateItemsAndEnemies(room);
-		PrintRoomInfo(room);
+		//PrintRoomInfo(room);
 		return room;
 	}
 
