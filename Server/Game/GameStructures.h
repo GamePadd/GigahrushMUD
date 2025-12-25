@@ -49,6 +49,13 @@ namespace Gigahrush {
 			bool canSpawn;
 
 			Item(int, std::string, std::string, std::string, bool);
+
+			Item(const Item& other) : ID(other.ID),
+				name(other.name),
+				description(other.description),
+				useDescription(other.useDescription),
+				canSpawn(other.canSpawn) {}
+
 			virtual ~Item();
 			virtual std::unique_ptr<Item> clone() const = 0;
 			virtual std::string use(Player&);
@@ -116,6 +123,35 @@ namespace Gigahrush {
 			Enemy(int, std::string, std::string, std::vector<std::string>, unsigned short int, unsigned short int, std::vector<std::unique_ptr<Item>>&&);
 			~Enemy();
 
+			Enemy(const Enemy& other) :
+				ID(other.ID),
+				name(other.name),
+				description(other.description),
+				replics(other.replics),
+				health(other.health),
+				attack(other.attack) {
+				for (auto &it : other.loot) {
+					loot.push_back(it->clone());
+				}
+			}
+
+			Enemy& operator= (const Enemy& other) {
+				ID = other.ID;
+				name = other.name;
+				description = other.description;
+				replics = other.replics;
+				health = other.health;
+				attack = other.attack;
+
+				loot.clear();
+
+				for (auto& it : other.loot) {
+					loot.push_back(it->clone());
+				}
+
+				return *this;
+			}
+
 			//std::string attack(Player&);
 	};
 
@@ -156,21 +192,97 @@ namespace Gigahrush {
 			enemies(std::move(_enemies)),
 			isExit(_isExit),
 			location(_location) {}
+
+		Room(const Room& other) :
+			ID(other.ID),
+			name(other.name),
+			description(other.description),
+			itemDescription(other.itemDescription),
+			enemyDescription(other.enemyDescription),
+			isExit(other.isExit),
+			location(other.location) {
+			for (auto &it : other.items) {
+				if (it) {
+					items.push_back(it->clone());
+				}
+			}
+
+			for (auto& it : other.enemies) {
+				if (it) {
+					enemies.push_back(std::make_unique<Enemy>(*it));
+				}
+			}
+		}
+
+		Room& operator= (const Room& other) {
+			if (this != &other) {
+				ID = other.ID;
+				name = other.name;
+				description = other.description;
+				itemDescription = other.itemDescription;
+				enemyDescription = other.enemyDescription;
+				isExit = other.isExit;
+				location = other.location;
+
+				items.clear();
+
+				for (auto& it : other.items) {
+					if (it) {
+						items.push_back(it->clone());
+					}
+				}
+
+				enemies.clear();
+
+				for (auto& it : other.enemies) {
+					if (it) {
+						enemies.push_back(std::make_unique<Enemy>(*it));
+					}
+				}
+			}
+
+			return *this;
+		}
+
+		std::unique_ptr<Room> clone() {
+			return std::make_unique<Room>(*this);
+		}
 	};
 
 	struct Floor {
 		unsigned short int level;
-		std::vector<Room*> rooms;
+		std::vector<std::unique_ptr<Room>> rooms;
 		std::vector<std::vector<int>> floorMask;
 		Location exitCoordinates;
-		bool canGoUp = false;
-		bool canGoDown = false;
+		bool canGoUp = true;
+		bool canGoDown = true;
+
+		Floor(unsigned short int _level, std::vector<std::unique_ptr<Room>>&& _rooms,
+			std::vector<std::vector<int>> _floorMask, Location _exitCoordinates, bool _canGoUp, bool _canGoDown) :
+			level(_level),
+			rooms(std::move(_rooms)),
+			floorMask(_floorMask),
+			exitCoordinates(_exitCoordinates),
+			canGoUp(_canGoUp),
+			canGoDown(_canGoDown) {}
+		/*
+		Floor(const Floor& other) :
+			level(other.level),
+			rooms(std::move(rooms)),
+			floorMask(other.floorMask),
+			exitCoordinates(other.exitCoordinates),
+			canGoUp(other.canGoUp),
+			canGoDown(other.canGoDown) {}
+
+		Floor& operator= (const Floor& other) {
+
+		}*/
 	};
 
 	//GameData
 
 	struct GameData {
-		std::vector<Floor> floors;
+		std::vector<std::unique_ptr<Floor>> floors;
 		std::vector<std::shared_ptr<Player>> players;
 	};
 }

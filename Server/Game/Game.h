@@ -47,7 +47,7 @@ namespace Gigahrush {
 			Game& operator= (Game const&) = delete;
 
 			void GenerateFloors();
-			void GenerateRoom();
+			std::unique_ptr<Room> GenerateRoom(Location);
 			void GenerateItemsAndEnemies();
 
 			bool changeDir(std::vector<std::vector<int>>&, int&, int&, int&);

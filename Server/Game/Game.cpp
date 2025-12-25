@@ -1,4 +1,4 @@
-#include "Game.h"
+﻿#include "Game.h"
 
 namespace Gigahrush {
 	void Configurator::LoadMapSize() {
@@ -302,14 +302,6 @@ namespace Gigahrush {
 		return g;
 	}
 
-	void Game::GenerateItemsAndEnemies() {
-
-	}
-
-	void Game::GenerateRoom() {
-
-	}
-
 	bool Game::changeDir(std::vector<std::vector<int>>& mask, int& X, int& Y, int& randDir) {
 		randDir = (rand() % 4) + 1;
 
@@ -431,7 +423,7 @@ namespace Gigahrush {
 			GenerateBranchMask(mask, currentX, currentY, remainingSteps, (rand() % 4) + 1);
 		}
 
-		if (rand() % 100 < 65) {
+		if (rand() % 100 < 75) {
 			int newX = currentX;
 			int newY = currentY;
 
@@ -491,28 +483,98 @@ namespace Gigahrush {
 		}
 	}
 
-	void Game::GenerateFloors() {
-		std::cout << "Started generate floors.\n";
+	void Game::GenerateItemsAndEnemies() {
 
-		//for (int i = 0; i < configurator.config.mapSize.FloorCount; i++) {
+	}
+
+	std::unique_ptr<Room> Game::GenerateRoom(Location loc) {
+		int RoomID = 0;
+
+		//Random algoritm
+		int Weight = 0;
+
+		for (auto ch : configurator.config.roomSpawnChances) {
+			Weight += ch.chance * 100;
+		}
+
+		int choose = rand() % Weight;
+
+		Weight = 0;
+
+		for (auto ch : configurator.config.roomSpawnChances) {
+			Weight += ch.chance * 100;
+			if (Weight >= choose) {
+				RoomID = ch.ID;
+			}
+		}
+		//End random
+		std::unique_ptr<Room> room;
+
+		for (auto& rm : configurator.config.rooms) {
+			if (rm->ID == RoomID) {
+				room = rm->clone();
+			}
+		}
+
+		room->location = loc;
+
+		return room;
+	}
+
+	void Game::GenerateFloors() {
+		std::cout << "\nStarted generate floors.\n\n";
+
+		for (int i = 1; i <= configurator.config.mapSize.FloorCount; i++) {
+			std::cout << "Floor - " << i << "\n\n";
+
+			std::unique_ptr<Floor> flr = std::make_unique<Floor>(
+				0,
+				std::vector<std::unique_ptr<Room>>{},
+				std::vector<std::vector<int>>{},
+				Location{ 0, 0, 0 },
+				false,
+				false
+			);
+
+			if (i == 1) {
+				flr->canGoDown = false;
+			}
+
+			if (i == configurator.config.mapSize.FloorCount) {
+				flr->canGoUp = false;
+			}
+
+			flr->level = i;
 			std::vector<std::vector<int>> mask(configurator.config.mapSize.X, std::vector<int>(configurator.config.mapSize.Y,0));
 
 			int randStartX = configurator.config.mapSize.X/2;
 			int randStartY = configurator.config.mapSize.Y/2;
+
+			flr->exitCoordinates = Location(randStartX, randStartY, i);
+
 			int remainingSteps = configurator.config.mapSize.X;
 
 			GenerateFloorMask(mask, randStartX, randStartY, remainingSteps, (rand()%4)+1);
+
+			flr->floorMask = mask;
 
 			//Print mask
 
 			for (int y = 0; y < mask.size(); y++) {
 				for (int x = 0; x < mask[0].size(); x++) {
-					if (mask[x][y] == 1) { std::cout << "#"; }
-					else { std::cout << " "; }
+					if (mask[x][y] == 1) {
+						Location loc(x, y, i);
+						flr->rooms.push_back(GenerateRoom(loc));
+						std::cout << "#";
+					}
+					else {
+						std::cout << " ";
+					}
 				}
 				std::cout << "\n";
 			}
-		//}
+			gamedata.floors.push_back(std::move(flr));
+		}
 	}
 
 	void Game::GenerateGame() {
