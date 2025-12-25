@@ -9,6 +9,7 @@
 
 std::mutex gameMutex;
 std::atomic<bool> serverRunning = false;
+std::atomic<bool> serverActive = false;
 
 std::string toLowerCase(std::string str) {
 	std::string res = "";
@@ -27,14 +28,18 @@ void StartServer() {
 	asio::io_context io_context;
 	Server srv(io_context, 15001);
 	srv.async_accept();
-	while (serverRunning) {
+	while (serverRunning == true) {
+		serverActive = true;
 		io_context.poll();
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
-
-	io_context.stop();
-	io_context.poll();
-	std::cout << "Server stopped\n";
+	if (serverActive == true) {
+		io_context.stop();
+		std::cout << "Server stopped\n";
+	}
+	else {
+		std::cout << "Server not started xd\n";
+	}
 }
 
 void Terminal() {
@@ -76,7 +81,7 @@ void Terminal() {
 			std::cout << "Stopping server...\n";
 			serverRunning = false;
 
-			if (serverThread.joinable()) {
+			if (serverThread.joinable() && serverActive) {
 				serverThread.join();
 			}
 		}
