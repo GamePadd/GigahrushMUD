@@ -283,6 +283,7 @@ namespace Gigahrush {
 	}
 
 	bool Configurator::LoadConfig() {
+		config = Config();
 		std::cout << "=== Starting loading config ===" << std::endl << std::endl;
 
 		LoadMapSize();
@@ -644,10 +645,10 @@ namespace Gigahrush {
 	}
 
 	void Game::GenerateFloors() {
-		std::cout << "\nStarted generate floors.\n";
+		//std::cout << "\nStarted generate floors.\n";
 
 		for (int i = 1; i <= configurator.config.mapSize.FloorCount; i++) {
-			std::cout << "\nFloor - " << i << "\n\n";
+			//std::cout << "\nFloor - " << i << "\n\n";
 
 			std::unique_ptr<Floor> flr = std::make_unique<Floor>(
 				0,
@@ -692,31 +693,71 @@ namespace Gigahrush {
 						else { isex = false; }
 
 						flr->rooms.push_back(GenerateRoom(loc,isex));
-						std::cout << "#";
+						//std::cout << "#";
 					}
 					else {
-						std::cout << " ";
+						//std::cout << " ";
 					}
 				}
-				std::cout << "\n";
+				//std::cout << "\n";
 			}
 			gamedata.floors.push_back(std::move(flr));
 		}
 	}
 
 	bool Game::GenerateGame() {
+		gamedata = GameData();
 		std::cout << "=== GENERATING GAME ===\n\n";
-		if (configurator.config.configLoaded == true) {
+		if (configurator.config.configLoaded == true) { //&& isGenerated == false
 			auto start = std::chrono::high_resolution_clock::now();
 			GenerateFloors();
 			auto end = std::chrono::high_resolution_clock::now();
 			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 			std::cout << "Game generated in " << duration << ", server now can be started!\n";
+			isGenerated = true;
 			return true;
 		}
 		else {
+			/*
+			if (isGenerated) {
+				std::cout << "Can't generate game, already generated. Please type 'reset' for reset game.\n";
+				return false;
+			}
+			*/
+
 			std::cout << "Can't generate game, config is not loaded\n";
 			return false;
+		}
+	}
+
+	void Game::ResetGame() {
+		gamedata = GameData();
+	}
+
+	void Game::Info() {
+		if (isGenerated) {
+			size_t rooms = 0;
+			size_t items = 0;
+			size_t enemies = 0;
+
+			for (auto& it : gamedata.floors) {
+				rooms += it->rooms.size();
+				for (auto& lol : it->rooms) {
+					items += lol->items.size();
+				}
+				for (auto& lol : it->rooms) {
+					enemies += lol->enemies.size();
+				}
+			}
+
+			std::cout << "=== GAME INFO ===\n\n";
+			std::cout << "Floors count: " << gamedata.floors.size() << "\n";
+			std::cout << "Rooms count: " << rooms << "\n";
+			std::cout << "Items count: " << items << "\n";
+			std::cout << "Enemies count: " << enemies << "\n";
+		}
+		else {
+			std::cout << "No info. Game is not generated or loaded\n";
 		}
 	}
 

@@ -67,7 +67,7 @@ int main()
 					std::getline(std::cin, msg);
 
 					if (msg == "") continue;
-					if (msg == "exit") { break; running = false; };
+					if (msg == "exit") { running = false; break; };
 
 					std::string msg_utf8 = ConvertCP1251ToUTF8(msg);
 					std::string str = client.Send(msg_utf8);
@@ -92,7 +92,10 @@ int main()
 			std::string ans;
 			std::getline(std::cin, ans);
 			if (ans == "Y" || ans == "y") {
-				continue;
+				break;
+			}
+			else {
+				running = false;
 			}
 		}
 	}

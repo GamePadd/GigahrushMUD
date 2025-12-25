@@ -50,27 +50,43 @@ void Terminal() {
 		std::getline(std::cin, command);
 		std::string lowCom = toLowerCase(command);
 
-		if (lowCom == "loadconfig") {
+		if (lowCom == "loadconf") {
 			gameMutex.lock();
 			bool x = Game.configurator.LoadConfig();
 			gameMutex.unlock();
 		}
-		else if (lowCom == "generate") {
+		else if (lowCom == "gen") {
 			gameMutex.lock();
 			bool x = Game.GenerateGame();
 			gameMutex.unlock();
 		}
-		else if (lowCom == "startserver") {
+		else if (lowCom == "start") {
 			std::cout << "Starting server...\n";
-			serverRunning = true;
+
+			gameMutex.lock();
+			if (Game.isGenerated) {
+				serverRunning = true;
+			}
+			else {
+				std::cout << "Can't start server. Game is not generated or loaded.\n";
+			}
+			gameMutex.unlock();
 		}
-		else if (lowCom == "stopserver") {
+		else if (lowCom == "stop") {
 			std::cout << "Stopping server...\n";
 			serverRunning = false;
 
 			if (serverThread.joinable()) {
 				serverThread.join();
 			}
+		}
+		else if (lowCom == "reset") {
+			std::cout << "Reseting game...\n";
+		}
+		else if (lowCom == "info") {
+			gameMutex.lock();
+			Game.Info();
+			gameMutex.unlock();
 		}
 		else if (lowCom == "exit") {
 			std::cout << "Stopping server...\n";

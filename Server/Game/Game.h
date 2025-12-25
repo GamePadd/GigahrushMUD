@@ -60,10 +60,15 @@ namespace Gigahrush {
 		public:
 			Configurator configurator;
 			GameData gamedata;
+			bool isGenerated;
 
 			static Game& Instance();
 			
 			bool GenerateGame();
+			void ResetGame();
+
+			void Info();
+
 			std::string ParseCommand();
 	};
 }
