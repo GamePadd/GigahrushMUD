@@ -73,6 +73,6 @@ namespace Gigahrush {
 
 			void Info();
 
-			std::string ParseCommand();
+			std::string ParseCommand(std::shared_ptr<Gigahrush::Player>);
 	};
 }

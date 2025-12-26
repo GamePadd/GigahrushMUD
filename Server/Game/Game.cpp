@@ -780,16 +780,17 @@ namespace Gigahrush {
 			std::cout << "Rooms count: " << rooms << "\n";
 			std::cout << "Items count: " << items << "\n";
 			std::cout << "Enemies count: " << enemies << "\n";
+			std::cout << "Players on server: " << gamedata.players.size() << "\n";
 		}
 		else {
 			std::cout << "No info. Game is not generated or loaded\n";
 		}
 	}
 
-	std::string Game::ParseCommand() {
+	std::string Game::ParseCommand(std::shared_ptr<Gigahrush::Player> ply) {
 		std::lock_guard<std::mutex> lock(game_mutex);
 
-		std::cout << "Парсилка команды\n";
+		std::cout << "Запрос от игрока под ником " << ply->username << "\n";
 		return "Елда!";
 	}
 }

@@ -1,10 +1,13 @@
 ﻿#include <locale>
 #include <codecvt>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
 #include "asio.hpp"
 #include "Client.h"
 
-bool running = true;
+std::atomic<bool> running = true;
 
 std::string ConvertCP1251ToUTF8(const std::string& str)
 {
@@ -56,12 +59,23 @@ int main()
 	//audiere::AudioDevicePtr device = audiere::OpenDevice();
 	//audiere::SoundEffect* sound = audiere::OpenSoundEffect(device, "effect.mp3", audiere::SINGLE);
 
+	std::string nick;
+	do {
+		std::cout << "> Введите ник: ";
+		std::getline(std::cin, nick);
+	} while (nick == "");
+
 	while (running) {
 		asio::io_context io_context;
 		//sound->play();
 		try {
 			Client client(io_context, ip, port);
 			client.Connect();
+
+			std::string nickConv = ConvertCP1251ToUTF8(nick);
+			std::string str = client.Send(nickConv);
+			std::string response_local = ConvertUTF8ToCP1251(str);
+			std::cout << response_local << std::endl;
 
 			while (true) {
 				try {
@@ -74,7 +88,7 @@ int main()
 					std::string msg_utf8 = ConvertCP1251ToUTF8(msg);
 					std::string str = client.Send(msg_utf8);
 					std::string response_local = ConvertUTF8ToCP1251(str);
-					std::cout << "Ответ от сервера: " << response_local << std::endl;
+					std::cout << response_local << std::endl;
 				}
 				catch (const std::exception& e) {
 					std::cout << "Ошибка соединения подключится.\nПопробовать снова? (Y/N) :";

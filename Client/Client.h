@@ -14,6 +14,7 @@ class Client {
 		char* port;
 
 		std::string recv_buffer;
+
 	public:
 		Client(asio::io_context& io_context_, char* ip, char* port);
 

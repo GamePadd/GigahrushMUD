@@ -9,7 +9,12 @@ void Server::async_accept() {
 	socket.emplace(io_context);
 
 	acceptor.async_accept(*socket, [&](asio::error_code error) {
-		std::make_shared<Session>(std::move(*socket))->start();
+		Gigahrush::Game& game = Gigahrush::Game::Instance();
+		std::shared_ptr<Gigahrush::Player> ply = std::make_shared<Gigahrush::Player>();
+
+		game.gamedata.players.push_back(ply);
+
+		std::make_shared<Session>(std::move(*socket),ply)->start();
 		async_accept();
-		});
+	});
 }
