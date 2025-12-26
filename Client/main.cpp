@@ -1,6 +1,5 @@
 ﻿#include <locale>
 #include <codecvt>
-#include "audiere.h"
 
 #include "asio.hpp"
 #include "Client.h"
@@ -54,12 +53,12 @@ int main()
 	char ip[] = "localhost";
 	char port[] = "15001";
 
-	audiere::AudioDevicePtr device = audiere::OpenDevice();
-	audiere::SoundEffect* sound = audiere::OpenSoundEffect(device, "effect.mp3", audiere::SINGLE);
+	//audiere::AudioDevicePtr device = audiere::OpenDevice();
+	//audiere::SoundEffect* sound = audiere::OpenSoundEffect(device, "effect.mp3", audiere::SINGLE);
 
 	while (running) {
 		asio::io_context io_context;
-		sound->play();
+		//sound->play();
 		try {
 			Client client(io_context, ip, port);
 			client.Connect();

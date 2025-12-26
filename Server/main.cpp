@@ -21,13 +21,15 @@ std::string toLowerCase(std::string str) {
 }
 
 void StartServer() {
+	asio::io_context io_context;
+	Server srv(io_context, 15001);
+
 	while (!isExit) {
 		while (!serverRunning) {
+			if (isExit) { break; }
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
 
-		asio::io_context io_context;
-		Server srv(io_context, 15001);
 		srv.async_accept();
 		while (serverRunning == true) {
 			serverActive = true;
@@ -41,6 +43,14 @@ void StartServer() {
 		else {
 			std::cout << "Server not started xd\n";
 		}
+	}
+
+	if (serverActive == true) {
+		io_context.stop();
+		std::cout << "Server stopped\n";
+	}
+	else {
+		std::cout << "Server not started xd\n";
 	}
 }
 

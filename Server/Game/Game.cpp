@@ -787,6 +787,8 @@ namespace Gigahrush {
 	}
 
 	std::string Game::ParseCommand() {
+		std::lock_guard<std::mutex> lock(game_mutex);
+
 		std::cout << "Парсилка команды\n";
 		return "Елда!";
 	}

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <format>
 #include <chrono>
+#include <mutex>
 
 namespace Gigahrush {
 	struct Config {
@@ -57,6 +58,8 @@ namespace Gigahrush {
 			bool changeDir(std::vector<std::vector<int>>&, int&, int&, int&);
 			void GenerateBranchMask(std::vector<std::vector<int>>&, int, int, int, int);
 			void GenerateFloorMask(std::vector<std::vector<int>>&, int, int, int, int);
+
+			std::mutex game_mutex;
 
 		public:
 			Configurator configurator;
