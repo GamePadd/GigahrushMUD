@@ -39,9 +39,7 @@ void Session::firstTime() {
 						}
 
 						if (!plyFound) {
-							std::shared_ptr<Gigahrush::Player> ply = std::make_shared<Gigahrush::Player>();
-							Gigahrush::Game::Instance().gamedata.players.push_back(ply);
-							self->sessionPlayer = ply;
+							self->sessionPlayer = Gigahrush::Game::Instance().SpawnPlayer(self->buffer);
 						}
 
 						self->sessionPlayer->username = self->buffer;

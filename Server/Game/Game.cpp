@@ -785,7 +785,13 @@ namespace Gigahrush {
 		}
 	}
 
-	std::string Game::ParseCommand(std::shared_ptr<Gigahrush::Player> ply) {
+	std::shared_ptr<Player> Game::SpawnPlayer(std::string& name) {
+		std::shared_ptr<Player> ply = std::make_shared<Player>();
+		gamedata.players.push_back(ply);
+		return ply;
+	}
+
+	std::string Game::ParseCommand(std::shared_ptr<Player> ply) {
 		std::lock_guard<std::mutex> lock(game_mutex);
 
 		std::cout << "Запрос от игрока под ником " << ply->username << "\n";

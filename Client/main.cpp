@@ -99,6 +99,7 @@ int main()
 					}
 					else {
 						running = false;
+						break;
 					}
 				}
 			}
