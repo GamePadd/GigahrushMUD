@@ -72,7 +72,7 @@ void Session::read() {
 				self->buffer.resize(bytes_received);
 				//std::cout << "\n\nREAD DEBUG\n\n";
 				if (Gigahrush::Game::Instance().gamedata.players.size() != 0) {
-					std::string answer = self->game.ParseCommand(self->sessionPlayer);
+					std::string answer = self->game.ParseCommand(self->sessionPlayer,self->buffer);
 					std::size_t bt = asio::write(self->socket, asio::buffer(answer));
 					self->buffer.resize(256);
 					self->read();

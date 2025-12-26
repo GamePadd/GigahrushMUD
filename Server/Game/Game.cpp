@@ -791,10 +791,15 @@ namespace Gigahrush {
 		return ply;
 	}
 
-	std::string Game::ParseCommand(std::shared_ptr<Player> ply) {
+	std::string Game::ParseCommand(std::shared_ptr<Player> ply, std::string& command) {
 		std::lock_guard<std::mutex> lock(game_mutex);
 
 		std::cout << "Запрос от игрока под ником " << ply->username << "\n";
+
+		if (command == "ХУЙ") {
+			return "Иди нахуй сука";
+		}
+
 		return "Елда!";
 	}
 }
