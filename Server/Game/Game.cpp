@@ -969,7 +969,7 @@ namespace Gigahrush {
 	}
 
 	std::string Game::PickupItem(std::shared_ptr<Gigahrush::Player> ply, std::string item) {
-		std::string res = "";
+		std::string res = "Этого предмета нет в комнате";
 
 		bool isFound = false;
 		for (int i = 0; i < ply->location->items.size(); i++) {
@@ -977,7 +977,7 @@ namespace Gigahrush {
 				for (int j = 0; j < ply->location->itemDescription.size(); j++) {
 					if (ply->location->itemDescription[j].ID == ply->location->items[i]->ID) {
 						ply->inventory.push_back(ply->location->items[i]->clone());
-						res += "Вы подняли " + ply->location->items[i]->name + "\n";
+						res = "Вы подняли " + ply->location->items[i]->name + "";
 						ply->location->items.erase(ply->location->items.begin() + i);
 						ply->location->itemDescription.erase(ply->location->itemDescription.begin() + j);
 						isFound = true;
@@ -994,11 +994,11 @@ namespace Gigahrush {
 	}
 
 	std::string Game::Inventory(std::shared_ptr<Player> ply) {
-		std::string res = "Ваш инвентарь: \n";
+		std::string res = "Ваш инвентарь:";
 		size_t i = 1;
 
 		for (auto& it : ply->inventory) {
-			res += std::to_string(i) + ". " + it->name + "\n";
+			res += "\n" + std::to_string(i) + ". " + it->name;
 			++i;
 		}
 
