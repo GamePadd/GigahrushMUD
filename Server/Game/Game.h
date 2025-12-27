@@ -75,7 +75,13 @@ namespace Gigahrush {
 
 			//Commands
 
+			std::string Me(std::shared_ptr<Gigahrush::Player>);
 			std::string Look(std::shared_ptr<Gigahrush::Player>);
+			std::string Move(std::shared_ptr<Gigahrush::Player>, std::string);
+			std::string Craft(std::shared_ptr<Gigahrush::Player>, std::string);
+			std::string DropItem(std::shared_ptr<Gigahrush::Player>, std::string);
+			std::string PickupItem(std::shared_ptr<Gigahrush::Player>, std::string);
+
 
 			//EndCommands
 

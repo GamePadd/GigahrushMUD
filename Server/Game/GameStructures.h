@@ -171,12 +171,24 @@ namespace Gigahrush {
 			//std::string attack(Player&);
 	};
 
+	struct PlayerStats {
+		//Main stats
+		int health;
+		int armor;
+
+		int level;
+		int inventoryMaxSize;
+		//Skill stats
+		int weaponSkill;
+	};
+
 	struct Player {
 		std::string username;
 		std::shared_ptr<Room> location;
 		std::shared_ptr<Floor> floor;
 		std::vector<std::unique_ptr<Item>> inventory;
 		Status status;
+		PlayerStats stats;
 	};
 
 	struct RoomDescElement {

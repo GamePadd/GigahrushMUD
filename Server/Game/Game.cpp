@@ -19,7 +19,7 @@ namespace Gigahrush {
 		config.maxInventorySize = SizeConfig["MaxInventory"];
 		config.maxRoomItems = SizeConfig["MaxRoomItems"];
 
-		std::cout << "=== Main config loaded ===" << std::endl;
+		std::cout << "Main config loaded" << std::endl;
 	}
 
 	void Configurator::LoadItems() {
@@ -69,9 +69,7 @@ namespace Gigahrush {
 			}
 		}
 
-		std::cout << "=== Items loaded ===" << std::endl;
-		std::cout << "Items count: " << config.items.size() << std::endl;
-
+		std::cout << config.items.size() << " items loaded" << std::endl;
 	}
 
 	void Configurator::LoadEnemies() {
@@ -102,8 +100,7 @@ namespace Gigahrush {
 			config.enemySpawnChances.push_back(SpawnChance(EnemiesConfig[i]["id"], EnemiesConfig[i]["spawnChance"]));
 		}
 
-		std::cout << "=== Enemies loaded ===" << std::endl;
-		std::cout << "Enemies count: " << config.enemies.size() << std::endl;
+		std::cout << config.enemies.size() <<  " enemies loaded" << std::endl;
 	}
 
 	void Configurator::LoadRooms() {
@@ -131,8 +128,7 @@ namespace Gigahrush {
 			));
 			config.roomSpawnChances.push_back(SpawnChance(RoomsConfig[i]["id"], RoomsConfig[i]["spawnChance"]));
 		}
-		std::cout << "=== Rooms loaded ===" << std::endl;
-		std::cout << "Rooms count: " << config.rooms.size() << std::endl;
+		std::cout << config.rooms.size() <<  " rooms loaded" << std::endl;
 	}
 
 	void Configurator::LoadCrafts() {
@@ -147,8 +143,7 @@ namespace Gigahrush {
 			));
 		}
 
-		std::cout << "=== Crafts loaded ===" << std::endl;
-		std::cout << "Crafts count: " << config.crafts.size() << std::endl << std::endl;
+		std::cout << config.crafts.size() <<  " crafts loaded" << std::endl;
 	}
 
 	void Configurator::ShowAllConfig() {
@@ -294,7 +289,7 @@ namespace Gigahrush {
 
 	bool Configurator::LoadConfig() {
 		config = Config();
-		std::cout << "=== Starting loading config ===" << std::endl << std::endl;
+		std::cout << "Start loading config" << std::endl;
 
 		LoadMapSize();
 		LoadItems();
@@ -800,10 +795,12 @@ namespace Gigahrush {
 
 		//Random spawning
 
+		ply->status = NotInBattle;
+		ply->stats = PlayerStats(100, 0, 0, configurator.config.maxInventorySize, 0); //health,armor,level, max inv size,weaponskills
+
 		for (auto& it : gamedata.floors) {
 			if (it->level == 1) {
 				ply->floor = it;
-				ply->status = NotInBattle;
 				ply->location = it->rooms[rand() % it->rooms.size()];
 			}
 		}
@@ -812,12 +809,21 @@ namespace Gigahrush {
 		return ply;
 	}
 
+	std::string Game::Me(std::shared_ptr<Gigahrush::Player> ply) {
+		std::string res = "Имя: " + ply->username + "\n" +
+			"Уровень: " + std::to_string(ply->stats.level) + "\n" +
+			"Вместимость инвентаря: " + std::to_string(ply->stats.inventoryMaxSize) + "\n" +
+			"Здоровье: " + std::to_string(ply->stats.health) + "\n" +
+			"Броня: " + std::to_string(ply->stats.armor) + "\n" +
+			"Навык владения оружием: " + std::to_string(ply->stats.weaponSkill) + "\n";
+		return res;
+	}
+
 	std::string Game::Look(std::shared_ptr<Gigahrush::Player> ply) {
-		std::string res = ply->location->name + "\n" + ply->location->description + "\n\n";
+		std::string res = ply->location->name + "\n" + ply->location->description + "\n";
 		for (auto& it : ply->location->itemDescription) {
 			res += it.desc + "\n";
 		}
-		res += "\n";
 		for (auto& it : ply->location->enemyDescription) {
 			res += it.desc + "\n";
 		}
@@ -858,6 +864,22 @@ namespace Gigahrush {
 		return res;
 	}
 
+	std::string Game::Move(std::shared_ptr<Gigahrush::Player>, std::string side) {
+		return "Передвижение";
+	}
+
+	std::string Game::Craft(std::shared_ptr<Gigahrush::Player>, std::string item) {
+		return "Крафт";
+	}
+
+	std::string Game::DropItem(std::shared_ptr<Gigahrush::Player>, std::string item) {
+		return "Бросить";
+	}
+
+	std::string Game::PickupItem(std::shared_ptr<Gigahrush::Player>, std::string item) {
+		return "Поднять";
+	}
+
 	std::string Game::ParseCommand(std::shared_ptr<Player> ply, std::string& command) {
 		std::lock_guard<std::mutex> lock(game_mutex);
 
@@ -865,6 +887,9 @@ namespace Gigahrush {
 
 		if (toLowerCase(command) == "осмотреться") {
 			return Look(ply);
+		}
+		else if (toLowerCase(command) == "я") {
+			return Me(ply);
 		}
 
 		return "Неизвестная команда.";
