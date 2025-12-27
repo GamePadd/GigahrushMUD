@@ -999,6 +999,7 @@ namespace Gigahrush {
 
 		for (auto& it : ply->inventory) {
 			res += std::to_string(i) + ". " + it->name + "\n";
+			++i;
 		}
 
 		return res;
