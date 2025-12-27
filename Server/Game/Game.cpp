@@ -291,16 +291,20 @@ namespace Gigahrush {
 		config = Config();
 		std::cout << "Start loading config" << std::endl;
 
-		LoadMapSize();
-		LoadItems();
-		LoadEnemies();
-		LoadRooms();
-		LoadCrafts();
-
-		config.configLoaded = true;
-		std::cout << "Config loaded!\n";
-		return true;
-		ShowAllConfig();
+		try {
+			LoadMapSize();
+			LoadItems();
+			LoadEnemies();
+			LoadRooms();
+			LoadCrafts();
+			config.configLoaded = true;
+			std::cout << "Config loaded!\n";
+			return true;
+		}
+		catch (std::exception& e) {
+			std::cout << e.what() << "\n";
+		}
+		//ShowAllConfig();
 	}
 
 	Game& Game::Instance() {
