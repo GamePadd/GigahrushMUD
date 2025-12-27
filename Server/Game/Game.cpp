@@ -3,7 +3,7 @@
 namespace Gigahrush {
 	std::string toLowerCase(std::string str) {
 		std::string res = "";
-		for (auto c : str) {
+		for (unsigned char c : str) {
 			res += std::tolower(c);
 		}
 		return res;
@@ -969,7 +969,39 @@ namespace Gigahrush {
 	}
 
 	std::string Game::PickupItem(std::shared_ptr<Gigahrush::Player> ply, std::string item) {
-		return "Поднять";
+		std::string res = "";
+
+		bool isFound = false;
+		for (int i = 0; i < ply->location->items.size(); i++) {
+			if (ply->location->items[i]->name == item) {
+				for (int j = 0; j < ply->location->itemDescription.size(); j++) {
+					if (ply->location->itemDescription[j].ID == ply->location->items[i]->ID) {
+						ply->inventory.push_back(ply->location->items[i]->clone());
+						res += "Вы подняли " + ply->location->items[i]->name + "\n";
+						ply->location->items.erase(ply->location->items.begin() + i);
+						ply->location->itemDescription.erase(ply->location->itemDescription.begin() + j);
+						isFound = true;
+						break;
+					}
+				}
+			}
+			if (isFound) {
+				break;
+			}
+		}
+
+		return res;
+	}
+
+	std::string Game::Inventory(std::shared_ptr<Player> ply) {
+		std::string res = "Ваш инвентарь: \n";
+		size_t i = 1;
+
+		for (auto& it : ply->inventory) {
+			res += std::to_string(i) + ". " + it->name + "\n";
+		}
+
+		return res;
 	}
 
 	std::string Game::ParseCommand(std::shared_ptr<Player> ply, std::string& command) {
@@ -986,38 +1018,50 @@ namespace Gigahrush {
 		}
 
 		if (ply->battleStatus.status != InBattle) {
-			if (toLowerCase(splitCommand[0]) == "осмотреться") {
+			if (splitCommand[0] == "осмотреться") {
 				return Look(ply);
 			}
-			else if (toLowerCase(splitCommand[0]) == "я") {
+			else if (splitCommand[0] == "я") {
 				return Me(ply);
 			}
-			else if (toLowerCase(splitCommand[0]) == "идти") {
+			else if (splitCommand[0] == "идти") {
 				if (splitCommand.size() >= 2) {
-					if (toLowerCase(splitCommand[1]) == "на") {
+					if (splitCommand[1] == "на") {
 						if (splitCommand.size() >= 3) {
 							return Move(ply, splitCommand[2]);
 						}
 						else {
-							return "Неправильный синтаксис команды.";
+							return "Неправильный синтаксис команды";
 						}
 					}
 					else {
-						return "Неправильный синтаксис команды.";
+						return "Неправильный синтаксис команды";
 					}
 				}
 				else {
 					return "Неправильный синтаксис";
 				}
 			}
-			else if (toLowerCase(splitCommand[0]) == "карта") {
+			else if (splitCommand[0] == "поднять") {
+				if (splitCommand.size() >= 2) {
+					return PickupItem(ply, splitCommand[1]);
+				}
+				else {
+					return "Неправильный синтаксис";
+				}
+			}
+
+			else if (splitCommand[0] == "карта") {
 				return Map(ply);
+			}
+			else if (splitCommand[0] == "инвентарь") {
+				return Inventory(ply);
 			}
 		}
 		else {
 			return "Вы в бою";
 		}
 
-		return "Неизвестная команда.";
+		return "Неизвестная команда";
 	}
 }
