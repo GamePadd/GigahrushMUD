@@ -26,15 +26,19 @@ namespace Gigahrush {
 	}
 
 	std::pair<std::string, bool> Weapon::use(std::shared_ptr<Player>& ply) const {
-		return std::pair<std::string, bool>(std::string("Вы экипировали оружие!"), true);
+		return std::pair<std::string, bool>(std::string("Пока не реализовано!"), false);
 	}
 
 	std::pair<std::string, bool> Armor::use(std::shared_ptr<Player>& ply) const {
-		return std::pair<std::string, bool>(std::string("Вы получили броню!"), true);
+		ply->stats.armor += armor;
+		std::string res = "Вы использовали " + name + ". \n" + useDescription + "\nВы добавили " + std::to_string(armor) + " единиц брони";
+		return std::pair<std::string, bool>(res, true);
 	}
 
 	std::pair<std::string, bool> HealingItem::use(std::shared_ptr<Player>& ply) const {
-		return std::pair<std::string, bool>(std::string("Вы вылечились!"), true);
+		ply->stats.armor += heal;
+		std::string res = "Вы использовали " + name + ". \n" + useDescription + "\nВы добавили " + std::to_string(heal) + " единиц здоровья";
+		return std::pair<std::string, bool>(res, true);
 	}
 
 	//Descs
