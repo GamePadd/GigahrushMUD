@@ -21,10 +21,6 @@ namespace Gigahrush {
 	HealingItem::HealingItem(int _ID, std::string _name, std::string _description, std::string _useDescription, bool _canSpawn, int _heal) :
 		Item(_ID, _name, _description, _useDescription, _canSpawn), heal(_heal) {}
 
-	std::pair<std::string, bool> Item::use(std::shared_ptr<Player>& ply) const {
-		return std::pair<std::string, bool>(std::string("Вы использовали предмет!"), true);
-	}
-
 	std::pair<std::string, bool> Component::use(std::shared_ptr<Player>& ply) const {
 		return std::pair<std::string, bool>(std::string("Вы не можете использовать компонент!"), false);
 	}
@@ -44,19 +40,27 @@ namespace Gigahrush {
 	//Descs
 
 	std::string Component::getDescription() const {
-		return "";
+		std::string res = "";
+		res += "Предмет: " + name + "\nОписание: " + description + "\nНельзя использовать";
+		return res;
 	}
 
 	std::string Weapon::getDescription() const {
-		return "";
+		std::string res = "";
+		res += "Предмет: " + name + "\nОписание: " + description + "\nУрон: " + std::to_string(damage) + "\nВы можете экипировать этот предмет";
+		return res;
 	}
 
 	std::string Armor::getDescription() const {
-		return "";
+		std::string res = "";
+		res += "Предмет: " + name + "\nОписание: " + description + "\nВосстановление брони: " + std::to_string(armor) + "\nМожно использовать";
+		return res;
 	}
 
 	std::string HealingItem::getDescription() const {
-		return "";
+		std::string res = "";
+		res += "Предмет: " + name + "\nОписание: " + description + "\nВосстановление здоровья: " + std::to_string(heal) + "\nМожно использовать";
+		return res;
 	}
 
 	Enemy::Enemy(int _ID, std::string _name, std::string _description, std::vector<std::string> _replics, unsigned short int _health, unsigned short int _attack, std::vector<std::unique_ptr<Item>>&& _loot) :

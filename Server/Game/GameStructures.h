@@ -189,6 +189,10 @@ namespace Gigahrush {
 
 		int level;
 		int inventoryMaxSize;
+
+		bool wepEq;
+		int weaponEqID;
+
 		//Skill stats
 		int weaponSkill;
 	};

@@ -803,7 +803,7 @@ namespace Gigahrush {
 		//Random spawning
 
 		ply->battleStatus.status = NotInBattle;
-		ply->stats = PlayerStats(100, 0, 0, configurator.config.maxInventorySize, 0); //health,armor,level, max inv size,weaponskills
+		ply->stats = PlayerStats(100, 0, 0, configurator.config.maxInventorySize, false, 0, 0); //health,armor,level, max inv size, is weapon eq, weapon id, weaponskills
 
 		for (auto& it : gamedata.floors) {
 			if (it->level == 1) {
@@ -1177,7 +1177,7 @@ namespace Gigahrush {
 
 		for (auto& it : ply->inventory) {
 			if (it->name == item) {
-				res = it->description + "\nПри использовании " + it->useDescription;
+				res = it->getDescription();
 				break;
 			}
 		}
