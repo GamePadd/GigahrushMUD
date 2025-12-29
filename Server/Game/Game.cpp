@@ -1233,11 +1233,12 @@ namespace Gigahrush {
 				if (useRes.second == true) {
 					ply->inventory.erase(ply->inventory.begin() + i);
 				}
-				if (ply->battleStatus.status == InBattle) {
-					res += ply->battleStatus.enemy->Attack(ply);
-				}
 				break;
 			}
+		}
+
+		if (ply->battleStatus.status == InBattle) {
+			res += ply->battleStatus.enemy->Attack(ply);
 		}
 
 		return res;
