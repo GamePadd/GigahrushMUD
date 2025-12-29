@@ -1,4 +1,5 @@
 ﻿#include "GameStructures.h"
+#include <algorithm>
 
 namespace Gigahrush {
 	Item::Item(int _ID, const std::string& _name, const std::string& _description, const std::string& _useDescription, bool _canSpawn) :
@@ -51,7 +52,7 @@ namespace Gigahrush {
 
 	std::string Weapon::getDescription() const {
 		std::string res = "";
-		res += "Предмет: " + name + "\nОписание: " + description + "\nУрон: " + std::to_string(damage) + "\nВы можете экипировать этот предмет";
+		res += "Предмет: " + name + "\nОписание: " + description + "\nУрон: " + std::to_string(damage) + "\nВы можете атаковать этим предметом";
 		return res;
 	}
 
@@ -77,5 +78,23 @@ namespace Gigahrush {
 		loot(std::move(_loot)),
 		exp(_exp) {}
 	Enemy::~Enemy() {}
+
+	std::string Enemy::Attack(std::shared_ptr<Player>& ply) {
+		std::string res = "";
+		if (ply->stats.armor > 0) {
+			ply->stats.health = std::clamp(ply->stats.health - (attack / 2), 0, 100);
+			ply->stats.armor = std::clamp(ply->stats.armor - (attack / 2), 0, 100);
+
+			res = "\n" + name + " ударил вас на " + std::to_string(attack / 2) + " урона и снёс вам " + std::to_string(attack / 2) + " единиц брони.\n"
+				+ "Ваше здоровье: " + std::to_string(ply->stats.health) + "\nВаша броня: " + std::to_string(ply->stats.armor);
+		}
+		else {
+			ply->stats.health = std::clamp(ply->stats.health - attack, 0, 100);
+			res = "\n" + name + " ударил вас на " + std::to_string(attack) + " урона.\n"
+				+ "Ваше здоровье: " + std::to_string(ply->stats.health) + "\nВаша броня: " + std::to_string(ply->stats.armor);
+		}
+
+		return res;
+	}
 
 }

@@ -1233,6 +1233,9 @@ namespace Gigahrush {
 				if (useRes.second == true) {
 					ply->inventory.erase(ply->inventory.begin() + i);
 				}
+				if (ply->battleStatus.status == InBattle) {
+					res += ply->battleStatus.enemy->Attack(ply);
+				}
 				break;
 			}
 		}
@@ -1241,7 +1244,21 @@ namespace Gigahrush {
 	}
 
 	std::string Game::Attack(std::shared_ptr<Player> ply, std::string weaponName) {
-		std::string res = "";
+		std::string res = "Это не оружие, вы пропустили ход.";
+
+		for (auto& it : ply->inventory) {
+			if (it->name == weaponName) {
+				Weapon* wep = dynamic_cast<Weapon*>(it.get());
+				if (wep != nullptr) {
+					ply->battleStatus.enemy->health -= wep->damage;
+					res = "Вы нанесли врагу " + ply->battleStatus.enemy->name + " " + std::to_string(wep->damage) + " урона (Осталось " + std::to_string(ply->battleStatus.enemy->health) + " здоровья).";
+					break;
+				}
+			}
+		}
+
+		res += ply->battleStatus.enemy->Attack(ply);
+
 		return res;
 	}
 
@@ -1370,9 +1387,30 @@ namespace Gigahrush {
 				}
 			}
 			else {
-				return "Вы в бою";
+				if (splitCommand[0] == "атаковать") {
+					if (splitCommand.size() >= 2) {
+						return Attack(ply, splitCommand[1]);
+					}
+					else {
+						return "Неправильный синтаксис";
+					}
+				}
+				if (splitCommand[0] == "использовать") {
+					if (splitCommand.size() >= 2) {
+						return UseItem(ply, splitCommand[1]);
+					}
+					else {
+						return "Неправильный синтаксис";
+					}
+				}
+				else if (splitCommand[0] == "инвентарь") {
+					return Inventory(ply);
+				}
+				else if (splitCommand[0] == "я") {
+					return Me(ply);
+				}
+				return "В бою вы можете использовать только команды атаки, использования и инвентаря.";
 			}
-
 			return "Неизвестная команда";
 		}
 		catch (const std::exception e) {

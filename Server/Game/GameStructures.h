@@ -183,7 +183,7 @@ namespace Gigahrush {
 				return std::make_unique<Enemy>(*this);
 			}
 
-			//std::string attack(Player&);
+			std::string Attack(std::shared_ptr<Player>&);
 	};
 
 	struct PlayerStats {
