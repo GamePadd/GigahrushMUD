@@ -29,6 +29,10 @@ namespace Gigahrush {
 		}
 		else {
 			if (splitCommand.size() < 2) { return "Неправильный синтаксис"; }
+			if (splitCommand[1] == "на") { 
+				if (splitCommand.size() == 2) { return "Неправильный синтаксис"; }
+				else { return commands[splitCommand[0]].func(ply, splitCommand[2]); }
+			}
 			return commands[splitCommand[0]].func(ply, splitCommand[1]);
 		}
 	}

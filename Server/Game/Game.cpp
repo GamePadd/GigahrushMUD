@@ -1075,7 +1075,7 @@ namespace Gigahrush {
 		return res;
 	}
 
-	std::string Game::ChangeFloor(std::shared_ptr<Player> ply, std::string dir) { 
+	std::string Game::ChangeFloor(std::shared_ptr<Player> ply, int dir) { 
 		//1 - up 0 - down
 		std::string res = "";
 		std::shared_ptr<Floor> flrToChange = nullptr;
@@ -1084,7 +1084,7 @@ namespace Gigahrush {
 		bool canChange = false;
 
 		if (ply->location->isExit == true) {
-			if (dir == "вниз")
+			if (dir == 0)
 				if (ply->floor->canGoDown == true) {
 					for (auto& it : gamedata.floors) {
 						if (it->level == ply->floor->level-1) {
@@ -1102,7 +1102,7 @@ namespace Gigahrush {
 				else {
 					res = "Вы не можете спуститься ниже";
 				}
-			else if (dir == "вверх") {
+			else if (dir == 1) {
 				if (ply->floor->canGoUp == true) {
 					for (auto& it : gamedata.floors) {
 						if (it->level == ply->floor->level + 1) {
@@ -1207,6 +1207,8 @@ namespace Gigahrush {
 	}
 
 	std::string Game::Attack(std::shared_ptr<Player> ply) {
+		if (ply->battleStatus.status != InBattle) { return "Вы не в битве"; }
+
 		std::string res = "У вас не экипировано оружие";
 		bool isEnemyDead = false;
 
@@ -1389,8 +1391,8 @@ namespace Gigahrush {
 
 		commandhandler.add("поднять", [this](std::shared_ptr<Player> ply, std::string arg) {return this->PickupItem(ply, arg); }, 1, false);
 		commandhandler.add("инвентарь", [this](std::shared_ptr<Player> ply) {return this->Inventory(ply); }, 0, true);
-		commandhandler.add("вверх", [this](std::shared_ptr<Player> ply, std::string arg) {return this->ChangeFloor(ply, arg); }, 1, false);
-		commandhandler.add("вниз", [this](std::shared_ptr<Player> ply, std::string arg) {return this->ChangeFloor(ply, arg); }, 1, false);
+		commandhandler.add("вверх", [this](std::shared_ptr<Player> ply) {return this->ChangeFloor(ply, 1); }, 0, false);
+		commandhandler.add("вниз", [this](std::shared_ptr<Player> ply) {return this->ChangeFloor(ply, 0); }, 0, false);
 
 		commandhandler.add("осмотреть", [this](std::shared_ptr<Player> ply, std::string arg) {return this->LookItem(ply, arg); }, 1, false);
 		commandhandler.add("рецепты", [this](std::shared_ptr<Player> ply) {return this->EnableCrafts(ply); }, 0, false);
@@ -1411,155 +1413,5 @@ namespace Gigahrush {
 		std::string res = "";
 		res = commandhandler.handle(ply, command, inb);
 		return res;
-		/*
-		try {
-			std::lock_guard<std::mutex> lock(game_mutex);
-
-			std::cout << "Запрос от игрока под ником " << ply->username << "\n";
-
-			std::vector<std::string> splitCommand;
-			std::stringstream ss(command);
-			std::string word;
-
-			while (ss >> word) {
-				splitCommand.push_back(word);
-			}
-
-			if (ply->battleStatus.status != InBattle) {
-				if (splitCommand[0] == "осмотреться") {
-					return Look(ply);
-				}
-				else if (splitCommand[0] == "я") {
-					return Me(ply);
-				}
-				else if (splitCommand[0] == "идти") {
-					if (splitCommand.size() >= 2) {
-						if (splitCommand[1] == "на") {
-							if (splitCommand.size() >= 3) {
-								return Move(ply, splitCommand[2]);
-							}
-							else {
-								return "Неправильный синтаксис команды";
-							}
-						}
-						else {
-							return "Неправильный синтаксис команды";
-						}
-					}
-					else {
-						return "Неправильный синтаксис";
-					}
-				}
-				else if (splitCommand[0] == "поднять") {
-					if (splitCommand.size() >= 2) {
-						return PickupItem(ply, splitCommand[1]);
-					}
-					else {
-						return "Неправильный синтаксис";
-					}
-				}
-				else if (splitCommand[0] == "выбросить") {
-					if (splitCommand.size() >= 2) {
-						return DropItem(ply, splitCommand[1]);
-					}
-					else {
-						return "Неправильный синтаксис";
-					}
-				}
-				else if (splitCommand[0] == "карта") {
-					return Map(ply);
-				}
-				else if (splitCommand[0] == "инвентарь") {
-					return Inventory(ply);
-				}
-				else if (splitCommand[0] == "вверх") {
-					return ChangeFloor(ply, 1);
-				}
-				else if (splitCommand[0] == "вниз") {
-					return ChangeFloor(ply, 0);
-				}
-				else if (splitCommand[0] == "создать") {
-					if (splitCommand.size() >= 2) {
-						return Craft(ply, splitCommand[1]);
-					}
-					else {
-						return "Неправильный синтаксис";
-					}
-				}
-				else if (splitCommand[0] == "рецепты") {
-					return EnableCrafts(ply);
-				}
-				else if (splitCommand[0] == "осмотреть") {
-					if (splitCommand.size() >= 2) {
-						return LookItem(ply, splitCommand[1]);
-					}
-					else {
-						return "Неправильный синтаксис";
-					}
-				}
-				else if (splitCommand[0] == "использовать") {
-					if (splitCommand.size() >= 2) {
-						return UseItem(ply, splitCommand[1]);
-					}
-					else {
-						return "Неправильный синтаксис";
-					}
-				}
-				else if (splitCommand[0] == "атаковать") {
-					if (splitCommand.size() >= 2) {
-						return Battle(ply, splitCommand[1]);
-					}
-					else {
-						return "Неправильный синтаксис";
-					}
-				}
-				else if (splitCommand[0] == "экипировать") {
-					if (splitCommand.size() >= 2) {
-						return Equip(ply, splitCommand[1]);
-					}
-					else {
-						return "Неправильный синтаксис";
-					}
-				}
-			}
-			else {
-				if (splitCommand[0] == "атаковать") {
-					return Attack(ply);
-				}
-				if (splitCommand[0] == "использовать") {
-					if (splitCommand.size() >= 2) {
-						return UseItem(ply, splitCommand[1]);
-					}
-					else {
-						return "Неправильный синтаксис";
-					}
-				}
-				else if (splitCommand[0] == "инвентарь") {
-					return Inventory(ply);
-				}
-				else if (splitCommand[0] == "я") {
-					return Me(ply);
-				}
-				else if (splitCommand[0] == "пропустить") {
-					std::string res = ply->battleStatus.enemy->Attack(ply);
-					res += CheckPlayerDeath(ply);
-					return res;
-				}
-				else if (splitCommand[0] == "экипировать") {
-					if (splitCommand.size() >= 2) {
-						return Equip(ply, splitCommand[1]);
-					}
-					else {
-						return "Неправильный синтаксис";
-					}
-				}
-				return "В бою вы можете использовать только команды атаки, использования и инвентаря.";
-			}
-			return "Неизвестная команда";
-		}
-		catch (const std::exception e) {
-			std::cout << e.what();
-			return "Ошибка парсера. Попробуйте снова";
-		}*/
 	}
 }
