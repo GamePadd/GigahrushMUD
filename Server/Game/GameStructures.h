@@ -87,6 +87,7 @@ namespace Gigahrush {
 			int damage;
 
 			std::pair<std::string, bool> use(std::shared_ptr<Player>&) const override;
+			std::string equip(std::shared_ptr<Player>&);
 			std::string getDescription() const override;
 
 			Weapon(const Weapon& other) : Item(other), damage(other.damage) {};

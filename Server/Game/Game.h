@@ -91,8 +91,9 @@ namespace Gigahrush {
 			std::string LookItem(std::shared_ptr<Player>, std::string);
 			std::string EnableCrafts(std::shared_ptr<Player>);
 			std::string UseItem(std::shared_ptr<Player>, std::string);
-			std::string Attack(std::shared_ptr<Player>, std::string); // игрок, оружие
+			std::string Attack(std::shared_ptr<Player>); // игрок, оружие
 			std::string Battle(std::shared_ptr<Player>, std::string); // игрок, враг
+			std::string Equip(std::shared_ptr<Player>, std::string);
 
 			//EndCommands
 

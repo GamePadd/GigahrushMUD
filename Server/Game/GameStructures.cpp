@@ -97,4 +97,13 @@ namespace Gigahrush {
 		return res;
 	}
 
+	std::string Weapon::equip(std::shared_ptr<Player>& ply) {
+		std::string res = ""; 
+
+		ply->stats.weaponEqID = ID;
+		ply->stats.wepEq = true;
+
+		res = "Вы экипировали " + name;
+		return res;
+	}
 }

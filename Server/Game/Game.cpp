@@ -824,6 +824,15 @@ namespace Gigahrush {
 			"Здоровье: " + std::to_string(ply->stats.health) + "\n" +
 			"Броня: " + std::to_string(ply->stats.armor) + "\n" +
 			"Навык владения оружием: " + std::to_string(ply->stats.weaponSkill);
+
+		if (ply->stats.wepEq) {
+			for (auto& it : ply->inventory) {
+				if (it->ID == ply->stats.weaponEqID) {
+					res += "\nТекущее оружие: " + it->name;
+				}
+			}
+		}
+
 		return res;
 	}
 
@@ -1058,6 +1067,11 @@ namespace Gigahrush {
 		std::string res = "У вас нет этого предмета в инвентаре";
 		for (int i = 0; i < ply->inventory.size(); i++) {
 			if (ply->inventory[i]->name == item) {
+				if (ply->inventory[i]->ID == ply->stats.weaponEqID) {
+					ply->stats.weaponEqID = 0;
+					ply->stats.wepEq = false;
+				}
+
 				ply->location->items.push_back(ply->inventory[i]->clone());
 				res = "Вы выбросили " + ply->inventory[i]->name;
 				std::string phrase = "";
@@ -1251,11 +1265,21 @@ namespace Gigahrush {
 		return res;
 	}
 
-	std::string Game::Attack(std::shared_ptr<Player> ply, std::string weaponName) {
-		std::string res = "Это не оружие, вы пропустили ход.";
+	std::string Game::Attack(std::shared_ptr<Player> ply) {
+		std::string res = "У вас не экипировано оружие";
 		bool isEnemyDead = false;
+
+		if (ply->stats.wepEq == false) {
+			if (isEnemyDead == false) {
+				res += ply->battleStatus.enemy->Attack(ply);
+				res += CheckPlayerDeath(ply);
+			}
+
+			return res;
+		}
+
 		for (auto& it : ply->inventory) {
-			if (it->name == weaponName) {
+			if (it->ID == ply->stats.weaponEqID) {
 				Weapon* wep = dynamic_cast<Weapon*>(it.get());
 				if (wep != nullptr) {
 					ply->battleStatus.enemy->health = std::clamp(ply->battleStatus.enemy->health - (wep->damage + ply->stats.weaponSkill), 0, 1000);
@@ -1333,6 +1357,11 @@ namespace Gigahrush {
 			//inventory drop
 
 			for (int i = ply->inventory.size() - 1; i >= 0; i--) {
+				if (ply->inventory[i]->ID == ply->stats.weaponEqID) {
+					ply->stats.weaponEqID = 0;
+					ply->stats.wepEq = false;
+				}
+
 				ply->location->items.push_back(ply->inventory[i]->clone());
 				std::string phrase = "";
 				for (auto& it : configurator.config.roomDescs) {
@@ -1357,6 +1386,25 @@ namespace Gigahrush {
 				if (it->level == 1) {
 					ply->floor = it;
 					ply->location = it->rooms[rand() % it->rooms.size()];
+				}
+			}
+		}
+
+		return res;
+	}
+
+	std::string Game::Equip(std::shared_ptr<Player> ply, std::string wepName) {
+		std::string res = "Не найден предмет";
+
+		for (auto& it : ply->inventory) {
+			if (it->name == wepName) {
+				Weapon* wep = dynamic_cast<Weapon*>(it.get());
+				if (wep) {
+					res = wep->equip(ply);
+					break;
+				}
+				else {
+					res = "Это не оружие, вы не можете его экипировать.";
 				}
 			}
 		}
@@ -1466,15 +1514,18 @@ namespace Gigahrush {
 						return "Неправильный синтаксис";
 					}
 				}
-			}
-			else {
-				if (splitCommand[0] == "атаковать") {
+				else if (splitCommand[0] == "экипировать") {
 					if (splitCommand.size() >= 2) {
-						return Attack(ply, splitCommand[1]);
+						return Equip(ply, splitCommand[1]);
 					}
 					else {
 						return "Неправильный синтаксис";
 					}
+				}
+			}
+			else {
+				if (splitCommand[0] == "атаковать") {
+					return Attack(ply);
 				}
 				if (splitCommand[0] == "использовать") {
 					if (splitCommand.size() >= 2) {
@@ -1494,6 +1545,14 @@ namespace Gigahrush {
 					std::string res = ply->battleStatus.enemy->Attack(ply);
 					res += CheckPlayerDeath(ply);
 					return res;
+				}
+				else if (splitCommand[0] == "экипировать") {
+					if (splitCommand.size() >= 2) {
+						return Equip(ply, splitCommand[1]);
+					}
+					else {
+						return "Неправильный синтаксис";
+					}
 				}
 				return "В бою вы можете использовать только команды атаки, использования и инвентаря.";
 			}
