@@ -213,6 +213,7 @@ namespace Gigahrush {
 		std::vector<std::unique_ptr<Item>> inventory;
 		Battle battleStatus;
 		PlayerStats stats;
+		std::atomic<bool> isInSession;
 	};
 
 	struct RoomDescElement {

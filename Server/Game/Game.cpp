@@ -800,7 +800,7 @@ namespace Gigahrush {
 
 	std::shared_ptr<Player> Game::SpawnPlayer(std::string& name) {
 		std::shared_ptr<Player> ply = std::make_shared<Player>();
-
+		ply->username = name;
 		//Random spawning
 
 		ply->battleStatus.status = NotInBattle;
