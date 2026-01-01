@@ -81,16 +81,24 @@ namespace Gigahrush {
 
 	std::string Enemy::Attack(std::shared_ptr<Player>& ply) {
 		std::string res = "";
+
+		if (replics.size() == 1) {
+			res = "\nВраг сказал: " + replics[0] + "\n";
+		}
+		else {
+			res = "\nВраг сказал: " + replics[rand() % (replics.size() - 1)] + "\n";
+		}
+
 		if (ply->stats.armor > 0) {
 			ply->stats.health = std::clamp(ply->stats.health - (attack / 2), 0, 100);
 			ply->stats.armor = std::clamp(ply->stats.armor - (attack / 2), 0, 100);
 
-			res = "\n" + name + " ударил вас на " + std::to_string(attack / 2) + " урона и снёс вам " + std::to_string(attack / 2) + " единиц брони.\n"
+			res += "\n" + name + " ударил вас на " + std::to_string(attack / 2) + " урона и снёс вам " + std::to_string(attack / 2) + " единиц брони.\n"
 				+ "Ваше здоровье: " + std::to_string(ply->stats.health) + "\nВаша броня: " + std::to_string(ply->stats.armor);
 		}
 		else {
 			ply->stats.health = std::clamp(ply->stats.health - attack, 0, 100);
-			res = "\n" + name + " ударил вас на " + std::to_string(attack) + " урона.\n"
+			res += "\n" + name + " ударил вас на " + std::to_string(attack) + " урона.\n"
 				+ "Ваше здоровье: " + std::to_string(ply->stats.health) + "\nВаша броня: " + std::to_string(ply->stats.armor);
 		}
 
