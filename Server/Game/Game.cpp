@@ -1310,6 +1310,22 @@ namespace Gigahrush {
 						ply->stats.inventoryMaxSize += 1;
 						isEnemyDead = true;
 						res += "\nВы победили " + ply->battleStatus.enemy->name + " и получили " + std::to_string(ply->battleStatus.enemy->exp) + " опыта.";
+						int randItemFromEnemyID = 0;
+
+						if (ply->battleStatus.enemy->loot.size() != 1) {
+							randItemFromEnemyID = ply->battleStatus.enemy->loot[rand() % (ply->battleStatus.enemy->loot.size() - 1)]->ID;
+						}
+						else {
+							randItemFromEnemyID = ply->battleStatus.enemy->loot[0]->ID;
+						}
+
+						for (auto& it : configurator.config.items) {
+							if (it->ID == randItemFromEnemyID) {
+								ply->inventory.push_back(it->clone());
+								res += "\nВы получили с врага предмет " + it->name;
+								break;
+							}
+						}
 
 						for (int j = 0; j < ply->location->enemyDescription.size(); j++) {
 							if (ply->location->enemyDescription[j].ID == ply->battleStatus.enemy->ID) {

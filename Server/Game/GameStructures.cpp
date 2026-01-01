@@ -83,10 +83,10 @@ namespace Gigahrush {
 		std::string res = "";
 
 		if (replics.size() == 1) {
-			res = "\nВраг сказал: " + replics[0] + "\n";
+			res = "\nВраг сказал: " + replics[0];
 		}
 		else {
-			res = "\nВраг сказал: " + replics[rand() % (replics.size() - 1)] + "\n";
+			res = "\nВраг сказал: " + replics[rand() % (replics.size() - 1)];
 		}
 
 		if (ply->stats.armor > 0) {
