@@ -147,7 +147,13 @@ namespace Gigahrush {
 				RoomsConfig[i]["itemDescs"],
 				RoomsConfig[i]["enemiesDescs"]
 			));
-			config.roomSpawnChances.push_back(SpawnChance(RoomsConfig[i]["id"], RoomsConfig[i]["spawnChance"]));
+
+			if (RoomsConfig[i]["type"] == 2) {
+				config.exitRoomSpawnChances.push_back(SpawnChance(RoomsConfig[i]["id"], RoomsConfig[i]["spawnChance"]));
+			}
+			else {
+				config.roomSpawnChances.push_back(SpawnChance(RoomsConfig[i]["id"], RoomsConfig[i]["spawnChance"]));
+			}
 		}
 		std::cout << config.rooms.size() <<  " rooms loaded" << std::endl;
 	}
@@ -679,40 +685,77 @@ namespace Gigahrush {
 
 		//Random algoritm
 		int Weight = 0;
-
-		for (auto ch : configurator.config.roomSpawnChances) {
-			Weight += (ch.chance * 100);
-		}
-
-		int choose = rand() % Weight;
-
-		Weight = 0;
-
-		for (auto ch : configurator.config.roomSpawnChances) {
-			Weight += (ch.chance * 100);
-			if (Weight >= choose) {
-				RoomID = ch.ID;
-				break;
-			}
-		}
-		//End random
 		std::shared_ptr<Room> room;
 
-		for (auto& rm : configurator.config.rooms) {
-			if (rm->ID == RoomID) {
-				room = rm->clone();
+		if (!isExit) {
+			for (auto ch : configurator.config.roomSpawnChances) {
+				Weight += (ch.chance * 100);
 			}
+
+			int choose = rand() % Weight;
+
+			Weight = 0;
+
+			for (auto ch : configurator.config.roomSpawnChances) {
+				Weight += (ch.chance * 100);
+				if (Weight >= choose) {
+					RoomID = ch.ID;
+					break;
+				}
+			}
+			//End random
+
+			for (auto& rm : configurator.config.rooms) {
+				if (rm->ID == RoomID) {
+					room = rm->clone();
+				}
+			}
+
+			room->isExit = isExit;
+			room->location = loc;
+
+			ExitRoom* rmm = dynamic_cast<ExitRoom*>(room.get());
+
+			if (rmm != nullptr) { rmm->isBroken = false; }
+
+			GenerateItemsAndEnemies(room);
+			//PrintRoomInfo(room);
+		}
+		else {
+			for (auto ch : configurator.config.exitRoomSpawnChances) {
+				Weight += (ch.chance * 100);
+			}
+
+			int choose = rand() % Weight;
+
+			Weight = 0;
+
+			for (auto ch : configurator.config.exitRoomSpawnChances) {
+				Weight += (ch.chance * 100);
+				if (Weight >= choose) {
+					RoomID = ch.ID;
+					break;
+				}
+			}
+			//End random
+
+			for (auto& rm : configurator.config.rooms) {
+				if (rm->ID == RoomID) {
+					room = rm->clone();
+				}
+			}
+
+			room->isExit = isExit;
+			room->location = loc;
+
+			ExitRoom* rmm = dynamic_cast<ExitRoom*>(room.get());
+
+			if (rmm != nullptr) { rmm->isBroken = false; }
+
+			GenerateItemsAndEnemies(room);
+			//PrintRoomInfo(room);
 		}
 
-		room->isExit = isExit;
-		room->location = loc;
-
-		ExitRoom* rmm = dynamic_cast<ExitRoom*>(room.get());
-
-		if (rmm != nullptr) { rmm->isBroken = false; }
-
-		GenerateItemsAndEnemies(room);
-		//PrintRoomInfo(room);
 		return room;
 	}
 
