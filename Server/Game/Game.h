@@ -105,7 +105,7 @@ namespace Gigahrush {
 			std::string Attack(std::shared_ptr<Player>); // игрок, оружие
 			std::string Battle(std::shared_ptr<Player>, std::string); // игрок, враг
 			std::string Equip(std::shared_ptr<Player>, std::string);
-
+			std::string RepairExit(std::shared_ptr<Player>);
 			//EndCommands
 
 			std::shared_ptr<Gigahrush::Player> SpawnPlayer(std::string&);

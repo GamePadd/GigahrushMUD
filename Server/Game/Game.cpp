@@ -137,7 +137,8 @@ namespace Gigahrush {
 					std::vector<std::shared_ptr<Enemy>>{},
 					RoomsConfig[i]["isExit"],
 					Location(),
-					false
+					false,
+					RoomsConfig[i]["repairRecipe"]
 				));
 
 			}
@@ -760,7 +761,14 @@ namespace Gigahrush {
 
 			ExitRoom* rmm = dynamic_cast<ExitRoom*>(room.get());
 
-			if (rmm != nullptr) { rmm->isBroken = false; }
+			if (rmm != nullptr) { 
+				if (rand() % 100 < 5) {
+					rmm->isBroken = true;
+				}
+				else {
+					rmm->isBroken = false;
+				}
+			}
 
 			GenerateItemsAndEnemies(room);
 			//PrintRoomInfo(room);
@@ -1055,13 +1063,13 @@ namespace Gigahrush {
 
 						for (int i = ply->inventory.size() - 1; i >= 0 && delRemain > 0; i--) {
 							if (ply->inventory[i]->ID == id) {
-								res = "\nВы потеряли " + ply->inventory[i]->name;
+								res += "\nВы потеряли " + ply->inventory[i]->name;
 								ply->inventory.erase(ply->inventory.begin() + i);
 								--delRemain;
 							}
 						}
 					}
-					res = "Вы успешно скрафтили предмет - " + itemToCraft->name;
+					res += "\nВы успешно скрафтили предмет - " + itemToCraft->name;
 					ply->inventory.push_back(std::move(itemToCraft));
 				}
 				else {
@@ -1165,6 +1173,13 @@ namespace Gigahrush {
 		bool canChange = false;
 		
 		ExitRoom* rmm = dynamic_cast<ExitRoom*>(ply->location.get());
+
+		if (rmm != nullptr) {
+			if (rand() % 100 < 5) {
+				rmm->isBroken = true;
+				return "Вы сломали лифт, вы не сможете сменить этаж пока не почините его";
+			}
+		}
 
 		if (rmm != nullptr && rmm->isBroken == true) {
 			return "Вы не можете сменить этаж";
@@ -1462,6 +1477,56 @@ namespace Gigahrush {
 		return res;
 	}
 
+	std::string Game::RepairExit(std::shared_ptr<Player> ply) {
+		std::string res = "";
+
+		ExitRoom* rmm = dynamic_cast<ExitRoom*>(ply->location.get());
+
+		if (rmm != nullptr && rmm->isBroken == false) { return "Выход не сломан"; }
+		if (rmm == nullptr) { return "В этой комнате нечего чинить"; }
+
+		std::unordered_map<int, int> recipe;
+		std::unordered_map<int, int> inv;
+
+		//Repairing
+
+		for (auto& it : rmm->repairRecipe) {
+			recipe[it] += 1;
+		}
+
+		for (auto& it : ply->inventory) {
+			inv[it->ID] += 1;
+		}
+
+		bool canRepair = true;
+
+		for (auto [id, count] : recipe) {
+			if (inv[id] < count) {
+				canRepair = false;
+				return "Недостаточно предметов для починки";
+			}
+		}
+
+		if (canRepair) {
+			for (auto [id, count] : recipe) {
+				int delRemain = count;
+
+				for (int i = ply->inventory.size() - 1; i >= 0 && delRemain > 0; i--) {
+					if (ply->inventory[i]->ID == id) {
+						res += "\nВы потеряли " + ply->inventory[i]->name;
+						ply->inventory.erase(ply->inventory.begin() + i);
+						--delRemain;
+					}
+				}
+			}
+		}
+
+		rmm->isBroken = false;
+		res += "\nВы починили выход";
+
+		return res;
+	}
+
 	void Game::LoadConfig() {
 		configurator.LoadConfig();
 		//add commands
@@ -1484,6 +1549,7 @@ namespace Gigahrush {
 		commandhandler.add("осмотреть", [this](std::shared_ptr<Player> ply, std::string arg) {return this->LookItem(ply, arg); }, 1, false);
 		commandhandler.add("рецепты", [this](std::shared_ptr<Player> ply) {return this->EnableCrafts(ply); }, 0, false);
 		commandhandler.add("использовать", [this](std::shared_ptr<Player> ply, std::string arg) {return this->UseItem(ply, arg); }, 1, true);
+		commandhandler.add("починить", [this](std::shared_ptr<Player> ply, std::string arg) {return this->RepairExit(ply); }, 0, false);
 
 		commandhandler.add("атаковать", [this](std::shared_ptr<Player> ply) {return this->Attack(ply); }, 0, true);
 		commandhandler.add("битва", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Battle(ply, arg); }, 1, false);

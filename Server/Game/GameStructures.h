@@ -315,20 +315,23 @@ namespace Gigahrush {
 
 	struct ExitRoom : public Room {
 		bool isBroken;
+		std::vector<int> repairRecipe;
+
 		ExitRoom(int _ID, std::string _name, std::string _description,
 			std::vector<RoomDescElement> _itemDescription,
 			std::vector<RoomDescElement> _enemyDescription,
 			std::vector<std::unique_ptr<Item>>&& _items,
-			std::vector<std::shared_ptr<Enemy>> _enemies, bool _isExit, Location _location, bool _isBroken) :
+			std::vector<std::shared_ptr<Enemy>> _enemies, bool _isExit, Location _location, bool _isBroken, std::vector<int> _repairRecipe) :
 			Room(_ID, _name, _description, _itemDescription, _enemyDescription, std::move(_items), _enemies, _isExit, _location), 
-			isBroken(_isBroken) {}
+			isBroken(_isBroken), repairRecipe(_repairRecipe) {}
 
-		ExitRoom(const ExitRoom& other) : Room(other), isBroken(other.isBroken) {}
+		ExitRoom(const ExitRoom& other) : Room(other), isBroken(other.isBroken), repairRecipe(other.repairRecipe) {}
 
 		ExitRoom& operator= (const ExitRoom& other) {
 			if (this != &other) {
 				Room::operator=(other); 
 				isBroken = other.isBroken;
+				repairRecipe = other.repairRecipe;
 			}
 			return *this;
 		}
