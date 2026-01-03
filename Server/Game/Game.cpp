@@ -728,10 +728,6 @@ namespace Gigahrush {
 			room->isExit = isExit;
 			room->location = loc;
 
-			ExitRoom* rmm = dynamic_cast<ExitRoom*>(room.get());
-
-			if (rmm != nullptr) { rmm->isBroken = false; }
-
 			GenerateItemsAndEnemies(room);
 			//PrintRoomInfo(room);
 		}
@@ -1167,6 +1163,12 @@ namespace Gigahrush {
 		std::shared_ptr<Room> roomToChange = nullptr;
 
 		bool canChange = false;
+		
+		ExitRoom* rmm = dynamic_cast<ExitRoom*>(ply->location.get());
+
+		if (rmm != nullptr && rmm->isBroken == true) {
+			return "Вы не можете сменить этаж";
+		}
 
 		if (ply->location->isExit == true) {
 			if (dir == 0)
