@@ -55,7 +55,6 @@ void StartServer() {
 }
 
 void Terminal() {
-	srand(time(0));
 	Gigahrush::Game& Game = Gigahrush::Game::Instance();
 	setlocale(LC_ALL, "ru_RU.utf8");
 
@@ -124,6 +123,7 @@ void Terminal() {
 
 int main()
 {
+	srand(time(0));
 	std::thread t1(Terminal);
 	if (t1.joinable()) {
 		t1.join();
