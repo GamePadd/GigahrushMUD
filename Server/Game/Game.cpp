@@ -1237,11 +1237,18 @@ namespace Gigahrush {
 	}
 
 	std::string Game::LookItem(std::shared_ptr<Player> ply, std::string item) {
-		std::string res = "У вас не такого предмета";
+		std::string res = "У вас не такого предмета или такого врага нет в комнате";
 
 		for (auto& it : ply->inventory) {
 			if (it->name == item) {
 				res = it->getDescription();
+				break;
+			}
+		}
+
+		for (auto& it : ply->location->enemies) {
+			if (it->name == item) {
+				res = it->name + ": " + it->description;
 				break;
 			}
 		}
@@ -1331,10 +1338,10 @@ namespace Gigahrush {
 					res = "Вы нанесли врагу " + ply->battleStatus.enemy->name + " " + std::to_string(wep->damage) + " + " + std::to_string(ply->stats.weaponSkill) + " урона(Осталось " + std::to_string(ply->battleStatus.enemy->health) + " здоровья).";
 					if (ply->battleStatus.enemy->health <= 0) {
 						ply->stats.level += ply->battleStatus.enemy->exp;
-						ply->stats.weaponSkill += 1;
+						ply->stats.weaponSkill += ply->battleStatus.enemy->exp/2;
 						ply->stats.inventoryMaxSize += 1;
 						isEnemyDead = true;
-						res += "\nВы победили " + ply->battleStatus.enemy->name + " и получили " + std::to_string(ply->battleStatus.enemy->exp) + " опыта.";
+						res += "\nВы победили " + ply->battleStatus.enemy->name + " и получили " + std::to_string(ply->battleStatus.enemy->exp/2) + " опыта.";
 						int randItemFromEnemyID = 0;
 
 						if (ply->battleStatus.enemy->loot.size() != 1) {
@@ -1360,9 +1367,11 @@ namespace Gigahrush {
 						}
 
 						for (int i = 0; i < ply->location->enemies.size(); i++) {
-							if (ply->location->enemies[i]->battleWith->username == ply->username) {
-								ply->location->enemies.erase(ply->location->enemies.begin() + i);
-								break;
+							if (ply->location->enemies[i]->battleWith != nullptr) {
+								if (ply->location->enemies[i]->battleWith->username == ply->username) {
+									ply->location->enemies.erase(ply->location->enemies.begin() + i);
+									break;
+								}
 							}
 						}
 
@@ -1547,7 +1556,13 @@ namespace Gigahrush {
 		commandhandler.add("я", [this](std::shared_ptr<Player> ply) {return this->Me(ply); }, 0, true);
 		commandhandler.add("осмотреться", [this](std::shared_ptr<Player> ply) {return this->Look(ply);}, 0, false);
 
-		commandhandler.add("идти", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Move(ply,arg); }, 1, false);
+		//commandhandler.add("идти", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Move(ply,arg); }, 1, false);
+
+		commandhandler.add("север", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Move(ply, "север"); }, 0, false);
+		commandhandler.add("юг", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Move(ply, "юг"); }, 0, false);
+		commandhandler.add("запад", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Move(ply, "запад"); }, 0, false);
+		commandhandler.add("восток", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Move(ply, "восток"); }, 0, false);
+
 		commandhandler.add("создать", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Craft(ply, arg); }, 1, false);
 		commandhandler.add("выбросить", [this](std::shared_ptr<Player> ply, std::string arg) {return this->DropItem(ply, arg); }, 1, false);
 

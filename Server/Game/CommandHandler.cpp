@@ -12,28 +12,33 @@ namespace Gigahrush {
 	}
 
 	std::string CommandHandler::handle(std::shared_ptr<Player> ply, std::string command, bool inBattle) {
-		std::vector<std::string> splitCommand;
+		std::vector<std::string> args;
 		std::stringstream ss(command);
-		std::string word;
+		std::string commandS;
+		std::string arg;
+		ss >> commandS;
 
-		while (ss >> word) {
-			splitCommand.push_back(word);
-		}
+		std::getline(ss >> std::ws, arg);
 
-		auto comm = commands.find(splitCommand[0]);
+		auto comm = commands.find(commandS);
 
 		if (comm == commands.end()) { return "Неизвестная команда"; }
-		if (commands[splitCommand[0]].allowedInBattle == false && inBattle) { return "Вы не можете использовать эту команду в бою"; }
-		if (commands[splitCommand[0]].argc == 0) {
-			return commands[splitCommand[0]].func(ply, "");
+		if (commands[commandS].allowedInBattle == false && inBattle) { return "Вы не можете использовать эту команду в бою"; }
+		if (commands[commandS].argc == 0) {
+			return commands[commandS].func(ply, "");
 		}
 		else {
+			if (arg == "") { return "Неправильный синтаксис"; }
+			return commands[commandS].func(ply, arg);
+
+			/*
 			if (splitCommand.size() < 2) { return "Неправильный синтаксис"; }
 			if (splitCommand[1] == "на") { 
 				if (splitCommand.size() == 2) { return "Неправильный синтаксис"; }
 				else { return commands[splitCommand[0]].func(ply, splitCommand[2]); }
 			}
 			return commands[splitCommand[0]].func(ply, splitCommand[1]);
+			*/
 		}
 	}
 }
