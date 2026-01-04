@@ -37,7 +37,7 @@ namespace Gigahrush {
 	}
 
 	std::pair<std::string, bool> HealingItem::use(std::shared_ptr<Player>& ply) const {
-		ply->stats.armor += heal;
+		ply->stats.health += heal;
 		std::string res = "Вы использовали " + name + ". \n" + useDescription + "\nВам добавлено " + std::to_string(heal) + " единиц здоровья.";
 		return std::pair<std::string, bool>(res, true);
 	}
