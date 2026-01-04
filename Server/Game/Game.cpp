@@ -1546,6 +1546,18 @@ namespace Gigahrush {
 		return res;
 	}
 
+	std::string Game::CurrentPlayers(std::shared_ptr<Player> ply) {
+		std::string res = "Игроки в текущей комнате:";
+		size_t c = 1;
+		for (auto& it : gamedata.players) {
+			if (it->location->location == ply->location->location) {
+				res += "\n" + std::to_string(c) + ". " + it->username;
+			}
+		}
+
+		return res;
+	}
+
 	void Game::LoadConfig() {
 		configurator.LoadConfig();
 		//add commands
@@ -1570,6 +1582,7 @@ namespace Gigahrush {
 		commandhandler.add("инвентарь", [this](std::shared_ptr<Player> ply) {return this->Inventory(ply); }, 0, true);
 		commandhandler.add("вверх", [this](std::shared_ptr<Player> ply) {return this->ChangeFloor(ply, 1); }, 0, false);
 		commandhandler.add("вниз", [this](std::shared_ptr<Player> ply) {return this->ChangeFloor(ply, 0); }, 0, false);
+		commandhandler.add("игроки", [this](std::shared_ptr<Player> ply) {return this->CurrentPlayers(ply); }, 0, true);
 
 		commandhandler.add("осмотреть", [this](std::shared_ptr<Player> ply, std::string arg) {return this->LookItem(ply, arg); }, 1, false);
 		commandhandler.add("рецепты", [this](std::shared_ptr<Player> ply) {return this->EnableCrafts(ply); }, 0, false);
