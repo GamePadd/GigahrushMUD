@@ -1499,8 +1499,8 @@ namespace Gigahrush {
 
 			ply->stats.health = 100;
 			ply->stats.armor = 0;
-			ply->stats.level /= 2;
 			ply->stats.weaponSkill /= 2;
+			ply->stats.currentExp = 0;
 			ply->stats.inventoryMaxSize /= 2; //configurator.config.maxInventorySize;
 
 			for (auto& it : gamedata.floors) {
