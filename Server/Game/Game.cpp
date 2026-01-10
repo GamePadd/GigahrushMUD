@@ -1377,7 +1377,7 @@ namespace Gigahrush {
 						ply->stats.currentExp += ply->battleStatus.enemy->exp;
 
 						isEnemyDead = true;
-						res += "\nВы победили " + ply->battleStatus.enemy->name + " и получили " + std::to_string(ply->battleStatus.enemy->exp/2) + " опыта.";
+						res += "\nВы победили " + ply->battleStatus.enemy->name + " и получили " + std::to_string(ply->battleStatus.enemy->exp) + " опыта.";
 						int randItemFromEnemyID = 0;
 
 						res += CheckLevelUp(ply);
