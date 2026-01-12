@@ -63,7 +63,11 @@ std::string nick;
 asio::io_context io_context;
 Client client(io_context, ip, port);
 
+std::string lastCommand;
+
 void Connect() {
+	if (state == State::CONNECTED) { return; }
+
 	try {
 		client.ip = ip;
 		client.port = port;
@@ -178,7 +182,13 @@ int main()
 		if (event == ftxui::Event::Return) {
 			if (userCommand == "") { return true; }
 			logs.push_back(ServerAnswer(userCommand));
+			lastCommand = userCommand;
 			userCommand = "";
+			return true;
+		}
+
+		if(event == ftxui::Event::ArrowUp) {
+			userCommand = lastCommand;
 			return true;
 		}
 
@@ -220,7 +230,7 @@ int main()
 		auto game_box = ftxui::vbox({
 			logWindow->Render() | ftxui::vscroll_indicator | ftxui::frame | ftxui::border | ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 50) | ftxui::flex,
 			ftxui::hbox(ftxui::text("Команда: "), commandInput->Render()) });
-		auto game_window = ftxui::window(ftxui::text("Гигахрущ"), game_box) | ftxui::flex | ftxui::color(ftxui::Color::Green);
+		auto game_window = ftxui::window(ftxui::text("Гигахрущ"), game_box) | ftxui::color(ftxui::Color::Green);
 
 		auto server_box = ftxui::vbox({serverWindow->Render() | ftxui::vscroll_indicator | ftxui::frame | ftxui::flex});
 		auto server_window = ftxui::window(ftxui::text("Оповещения сервера"), server_box) | ftxui::flex | ftxui::color(ftxui::Color::Green);
@@ -229,7 +239,7 @@ int main()
 		auto map_window = ftxui::window(ftxui::text("Карта"), map_box) | ftxui::flex | ftxui::color(ftxui::Color::Green);
 
 		auto mainBox = ftxui::hbox({
-			game_window,
+			game_window | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 100),
 			ftxui::vbox({
 				server_window,
 				map_window
