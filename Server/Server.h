@@ -17,8 +17,8 @@ class Server {
 		Server(asio::io_context& io_context, std::uint16_t port);
 
 		//Timers
-		void timer1Exec(const asio::error_code&);
+		void mapUpdate(const asio::error_code&);
 
 		void async_accept();
-		void startTimer1();
+		void startMapUpdate();
 };

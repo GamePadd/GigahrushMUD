@@ -12,6 +12,8 @@
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/screen_interactive.hpp"
 
+#include "nlohmann/json.hpp"
+
 /*
 std::string ConvertCP1251ToUTF8(const std::string& str)
 {
@@ -117,7 +119,19 @@ void UpdateMsgThread() {
 		if (ec) { continue; }
 
 		client.recv_buffer_server.resize(br);
-		logs.push_back(client.recv_buffer_server);
+
+		nlohmann::json js = nlohmann::json::parse(client.recv_buffer_server);
+
+		if (js["type"] == "ANSWER") {
+			logs.push_back(js["message"]);
+		}
+		else if (js["type"] == "MAP") {
+			map = js["message"];
+		}
+		else if (js["type"] == "SERVER") {
+			serverMessages.push_back(js["message"]);
+		}
+
 		screen.PostEvent(ftxui::Event::Special("refresh"));
 	}
 	return;

@@ -24,7 +24,7 @@ void StartServer() {
 	asio::io_context io_context;
 	Server srv(io_context, 15001);
 
-	srv.startTimer1();
+	srv.startMapUpdate();
 
 
 	while (!isExit) {

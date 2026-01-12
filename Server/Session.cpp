@@ -75,7 +75,7 @@ void Session::firstTime() {
 			}
 
 			self->buffer.resize(256);
-			std::string first = "Вы успешно вошли\n" + Gigahrush::Game::Instance().Look(self->sessionPlayer);
+			std::string first = Gigahrush::Game::Instance().Look(self->sessionPlayer);
 			std::size_t bt = asio::write(self->socket, asio::buffer(first));
 
 			self->read();

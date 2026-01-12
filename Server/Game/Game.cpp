@@ -1,4 +1,5 @@
 ﻿#include "Game.h"
+#include "../utils.h"
 
 namespace Gigahrush {
 	std::string toLowerCase(std::string str) {
@@ -951,7 +952,7 @@ namespace Gigahrush {
 			res += "\n";
 		}
 
-		return res;
+		return toJson(res, "MAP");
 	}
 
 	std::string Game::Look(std::shared_ptr<Gigahrush::Player> ply) {
@@ -1004,7 +1005,7 @@ namespace Gigahrush {
 			}
 		}
 
-		return res;
+		return toJson(res,"ANSWER");
 	}
 
 	std::string Game::Move(std::shared_ptr<Gigahrush::Player> ply, std::string side) {

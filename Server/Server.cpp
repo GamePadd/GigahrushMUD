@@ -1,5 +1,6 @@
 ﻿#include "Session.h"
 #include "Server.h"
+#include "utils.h"
 
 Server::Server(asio::io_context& io_context, std::uint16_t port) :
 	io_context(io_context),
@@ -17,15 +18,17 @@ void Server::async_accept() {
 	});
 }
 
-void Server::timer1Exec(const asio::error_code& ec) {
-	std::cout << "\nTest timer";
+void Server::mapUpdate(const asio::error_code& ec) {
+	for (auto& it : allSessions) {
+		asio::write(it->socket, asio::buffer(Gigahrush::Game::Instance().Map(it->sessionPlayer)));
+	}
 }
 
-void Server::startTimer1() {
+void Server::startMapUpdate() {
 	timer1.expires_after(asio::chrono::seconds(2));
 	timer1.async_wait([this](const asio::error_code& ec) {
-		if (!ec) { timer1Exec(ec); }
+		if (!ec) { mapUpdate(ec); }
 		else { return; }
-		startTimer1();
+		startMapUpdate();
 	});
 }

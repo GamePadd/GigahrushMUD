@@ -9,11 +9,12 @@
 class Session : public std::enable_shared_from_this<Session> {
 	private:
 		std::string buffer;
-		asio::ip::tcp::socket socket;
 		Gigahrush::Game& game;
-		std::shared_ptr<Gigahrush::Player> sessionPlayer;
 
 	public:
+		asio::ip::tcp::socket socket;
+		std::shared_ptr<Gigahrush::Player> sessionPlayer;
+
 		Session(asio::ip::tcp::socket&& socket);
 		~Session();
 
