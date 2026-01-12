@@ -23,8 +23,9 @@ void Server::timer1Exec(const asio::error_code& ec) {
 
 void Server::startTimer1() {
 	timer1.expires_after(asio::chrono::seconds(2));
-	timer1.async_wait([&](const asio::error_code& ec) {
+	timer1.async_wait([this](const asio::error_code& ec) {
 		if (!ec) { timer1Exec(ec); }
+		else { return; }
 		startTimer1();
 	});
 }

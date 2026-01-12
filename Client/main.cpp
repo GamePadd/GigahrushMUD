@@ -12,6 +12,7 @@
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/screen_interactive.hpp"
 
+/*
 std::string ConvertCP1251ToUTF8(const std::string& str)
 {
 	int len = MultiByteToWideChar(1251, 0, str.c_str(), -1, NULL, 0);
@@ -44,7 +45,7 @@ std::string ConvertUTF8ToCP1251(const std::string& str)
 	delete[] cp1251;
 
 	return result;
-}
+}*/
 
 enum class State {CONNECTED, DISCONNECTED};
 
@@ -52,6 +53,8 @@ std::atomic<bool> running = true;
 State state = State::DISCONNECTED;
 
 std::vector<std::string> logs;
+std::vector<std::string> serverMessages;
+std::string map;
 
 std::string ip;
 std::string port;
@@ -143,6 +146,34 @@ int main()
 			ftxui::flex | ftxui::focusPositionRelative(0.0f, 1.0f);
 	});
 
+	ftxui::Component serverWindow = ftxui::Renderer([&] {
+		std::vector<ftxui::Element> elements;
+
+		for (const auto& log : serverMessages) {
+			elements.push_back(
+				ftxui::paragraph(log)
+			);
+
+			elements.push_back(ftxui::text(""));
+		}
+
+		return ftxui::vbox(elements) |
+			ftxui::frame |
+			ftxui::vscroll_indicator |
+			ftxui::flex | ftxui::focusPositionRelative(0.0f, 1.0f);
+	});
+
+	ftxui::Component mapWindow = ftxui::Renderer([&] {
+		std::vector<ftxui::Element> elements;
+
+		elements.push_back(ftxui::paragraph(map));
+
+		return ftxui::vbox(elements) |
+			ftxui::frame |
+			ftxui::vscroll_indicator |
+			ftxui::flex | ftxui::focusPositionRelative(0.0f, 1.0f);
+	});
+
 	ftxui::Component mainInputHandler = ftxui::CatchEvent(commandInput, [&](ftxui::Event event) {
 		if (event == ftxui::Event::Return) {
 			if (userCommand == "") { return true; }
@@ -157,7 +188,9 @@ int main()
 	ftxui::Component mainBox = ftxui::Container::Vertical({
 			firstField,
 			logWindow,
-			mainInputHandler
+			mainInputHandler,
+			serverWindow,
+			mapWindow
 		});
 	
 	ftxui::Component renderer = ftxui::Renderer(mainBox, [&] {
@@ -187,8 +220,24 @@ int main()
 		auto game_box = ftxui::vbox({
 			logWindow->Render() | ftxui::vscroll_indicator | ftxui::frame | ftxui::border | ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 50) | ftxui::flex,
 			ftxui::hbox(ftxui::text("Команда: "), commandInput->Render()) });
+		auto game_window = ftxui::window(ftxui::text("Гигахрущ"), game_box) | ftxui::flex | ftxui::color(ftxui::Color::Green);
 
-		return ftxui::window(ftxui::text("Гигахрущ"), game_box) | ftxui::flex | ftxui::color(ftxui::Color::Green);
+		auto server_box = ftxui::vbox({serverWindow->Render() | ftxui::vscroll_indicator | ftxui::frame | ftxui::flex});
+		auto server_window = ftxui::window(ftxui::text("Оповещения сервера"), server_box) | ftxui::flex | ftxui::color(ftxui::Color::Green);
+
+		auto map_box = ftxui::vbox({ mapWindow->Render() | ftxui::vscroll_indicator | ftxui::frame | ftxui::flex });
+		auto map_window = ftxui::window(ftxui::text("Карта"), map_box) | ftxui::flex | ftxui::color(ftxui::Color::Green);
+
+		auto mainBox = ftxui::hbox({
+			game_window,
+			ftxui::vbox({
+				server_window,
+				map_window
+			}) | ftxui::flex
+		}) | ftxui::flex;
+		return mainBox;
+
+		//return ftxui::window(ftxui::text("Гигахрущ"), game_box) | ftxui::flex | ftxui::color(ftxui::Color::Green);
 		});
 
 	auto screen = ftxui::ScreenInteractive::TerminalOutput();
