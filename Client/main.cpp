@@ -135,7 +135,7 @@ void UpdateMsgThread() {
 			}
 		}
 		catch (std::exception& er) {
-			//logs.push_back(er.what());
+			logs.push_back(ftxui::text(er.what()));
 		}
 
 		screen.PostEvent(ftxui::Event::Special("refresh"));
@@ -265,7 +265,7 @@ void MainThread() {
 		auto server_window = ftxui::window(ftxui::text("Оповещения сервера"), server_box) | ftxui::color(MAIN_COLOR) | ftxui::flex;
 
 		auto map_box = ftxui::vbox({ mapWindow->Render() | ftxui::vscroll_indicator | ftxui::frame | ftxui::flex }) | ftxui::flex;
-		auto map_window = ftxui::window(ftxui::text("Карта"), map_box) | ftxui::color(MAIN_COLOR) | ftxui::flex;
+		auto map_window = ftxui::window(ftxui::text("Карта"), map_box) | ftxui::color(ADD_COLOR1) | ftxui::flex;
 
 		auto right_column = ftxui::vbox({
 			server_window | ftxui::flex_grow,
