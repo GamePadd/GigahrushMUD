@@ -3,6 +3,10 @@
 void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 	size_t c = 1;
 
+	logs.push_back(ftxui::text(""));
+	logs.push_back(ftxui::text("---------------------"));
+	logs.push_back(ftxui::text(""));
+
 	if (obj["content"]["type"] == "Look") {
 		//Базовая инфа
 
@@ -123,7 +127,11 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 			}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 		}
 	}
-	else if (obj["content"]["type"] == "Четоеще") {
-
+	else if (obj["content"]["type"] == "Move") {
+		logs.push_back(ftxui::hflow({
+			ftxui::paragraph(obj["content"]["res"].get<std::string>()) | ftxui::color(DECORATE_COLOR)
+		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+		nlohmann::json lookObj = obj["content"]["look"].get<nlohmann::json>();
+		if (!lookObj.empty()) { addLog(logs,lookObj); }
 	}
 }
