@@ -6,6 +6,7 @@ set(SOURCES
 set(HEADERS
 	Client.h
 	Config.h
+	Parser.h
 )
 
 add_executable(GigahrushClient ${SOURCES} ${HEADERS})

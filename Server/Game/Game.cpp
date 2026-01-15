@@ -956,6 +956,7 @@ namespace Gigahrush {
 	}
 
 	std::string Game::Look(std::shared_ptr<Gigahrush::Player> ply) {
+		/*
 		std::string res = "\n" + ply->location->name + ": Этаж " + std::to_string(ply->floor->level) + "\n" +
 			"Координаты: [" + std::to_string(ply->location->location.X) + ", " + std::to_string(ply->location->location.Y) + "]\n\n===ОПИСАНИЕ===\n\n"+
 			ply->location->description;
@@ -1004,8 +1005,85 @@ namespace Gigahrush {
 				res += "\n\nНа локации сломан лифт, вы не можете перейти на другой этаж пока не почините лифт";
 			}
 		}
+		*/
 
-		return toJson(res,"ANSWER");
+		nlohmann::json res;
+
+		//ANSWER Type
+
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "Look";
+		res["content"]["coordinates"]["x"] = ply->location->location.X;
+		res["content"]["coordinates"]["y"] = ply->location->location.Y;
+		res["content"]["coordinates"]["floor"] = ply->floor->level;
+		res["content"]["coordinates"]["canGoUp"] = false;
+		res["content"]["coordinates"]["canGoDown"] = false;
+		res["content"]["coordinates"]["isExitBroken"] = false;
+		res["content"]["locationName"] = ply->location->name;
+		res["content"]["locationDescription"] = ply->location->description;
+
+		res["content"]["items"] = nlohmann::json::array();
+
+		if (ply->location->itemDescription.size() != 0) {
+			for (auto& it : ply->location->itemDescription) {
+				std::string name = "";
+
+				for (auto& itt : configurator.config.items) {
+					if (itt->ID == it.ID) { name = itt->name; break; }
+				}
+
+				res["content"]["items"].push_back({
+					{"name",name},
+					{"description",it.desc}
+				});
+			}
+		}
+
+		res["content"]["enemies"] = nlohmann::json::array();
+
+		if (ply->location->enemyDescription.size() != 0) {
+			for (auto& it : ply->location->enemyDescription) {
+				std::string name = "";
+
+				for (auto& itt : configurator.config.enemies) {
+					if (itt->ID == it.ID) { name = itt->name; break; }
+				}
+
+				res["content"]["enemies"].push_back({
+					{"name",name},
+					{"description",it.desc}
+				});
+			}
+		}
+
+		res["content"]["sides"] = nlohmann::json::array();
+
+		std::vector<std::vector<int>>& mask = ply->floor->floorMask;
+		int plyX = ply->location->location.X;
+		int plyY = ply->location->location.Y;
+
+		if ((plyY - 1 >= 0 && plyY - 1 < mask.size() && plyX >= 0 && plyX < mask[0].size()) && mask[plyY - 1][plyX] == 1) { res["content"]["sides"].push_back("север"); }
+		if ((plyY + 1 >= 0 && plyY + 1 < mask.size() && plyX >= 0 && plyX < mask[0].size()) && mask[plyY + 1][plyX] == 1) { res["content"]["sides"].push_back("юг"); }
+		if ((plyY >= 0 && plyY < mask.size() && plyX - 1 >= 0 && plyX - 1 < mask[0].size()) && mask[plyY][plyX - 1] == 1) { res["content"]["sides"].push_back("запад"); }
+		if ((plyY >= 0 && plyY < mask.size() && plyX + 1 >= 0 && plyX + 1 < mask[0].size()) && mask[plyY][plyX + 1] == 1) { res["content"]["sides"].push_back("восток"); }
+
+		if (ply->location->isExit == true) {
+			ExitRoom* rm = dynamic_cast<ExitRoom*>(ply->location.get());
+
+			if (rm != nullptr && rm->isBroken == false) {
+				if (ply->floor->canGoUp == true) {
+					res["content"]["coordinates"]["canGoUp"] = true;
+				}
+				if (ply->floor->canGoDown == true) {
+					res["content"]["coordinates"]["canGoDown"] = true;
+				}
+			}
+			else {
+				res["content"]["coordinates"]["isExitBroken"] = true;
+			}
+		}
+
+		return res.dump();
 	}
 
 	std::string Game::Move(std::shared_ptr<Gigahrush::Player> ply, std::string side) {
@@ -1612,7 +1690,7 @@ namespace Gigahrush {
 
 		CommandHandler& commandhandler = CommandHandler::Instance();
 
-		commandhandler.add("карта", [this](std::shared_ptr<Player> ply) {return this->Map(ply); }, 0, false);
+		//commandhandler.add("карта", [this](std::shared_ptr<Player> ply) {return this->Map(ply); }, 0, false);
 		commandhandler.add("я", [this](std::shared_ptr<Player> ply) {return this->Me(ply); }, 0, true);
 		commandhandler.add("осмотреться", [this](std::shared_ptr<Player> ply) {return this->Look(ply);}, 0, false);
 

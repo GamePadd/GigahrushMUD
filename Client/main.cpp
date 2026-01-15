@@ -15,6 +15,7 @@
 #include "nlohmann/json.hpp"
 
 #include "Config.h"
+#include "Parser.h"
 
 /*
 std::string ConvertCP1251ToUTF8(const std::string& str)
@@ -60,7 +61,7 @@ std::mutex mtx;
 
 State state = State::DISCONNECTED;
 
-std::vector<std::string> logs;
+std::vector<ftxui::Element> logs;
 std::vector<std::string> serverMessages;
 std::string map;
 
@@ -124,17 +125,17 @@ void UpdateMsgThread() {
 			nlohmann::json js = nlohmann::json::parse(client.recv_buffer_server);
 
 			if (js["type"] == "ANSWER") {
-				logs.push_back(js["message"]);
+				addLog(logs, js);
 			}
 			else if (js["type"] == "MAP") {
-				map = js["message"];
+				map = js["content"];
 			}
 			else if (js["type"] == "SERVER") {
-				serverMessages.push_back(js["message"]);
+				serverMessages.push_back(js["content"]);
 			}
 		}
 		catch (std::exception& er) {
-			logs.push_back(er.what());
+			//logs.push_back(er.what());
 		}
 
 		screen.PostEvent(ftxui::Event::Special("refresh"));
@@ -181,17 +182,7 @@ void MainThread() {
 	int selected_log = 0;
 
 	ftxui::Component logWindow = ftxui::Renderer([&] {
-		std::vector<ftxui::Element> elements;
-
-		for (const auto& log : logs) {
-			elements.push_back(
-				ftxui::hflow(ftxui::paragraph(log)) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50)
-			);
-
-			elements.push_back(ftxui::hflow(ftxui::paragraph("")));
-		}
-
-		return ftxui::vbox(elements) | ftxui::focusPositionRelative(0.0f, 1.0f);
+		return ftxui::vbox(logs) | ftxui::focusPositionRelative(0.0f, 1.0f);
 	});
 
 	ftxui::Component serverWindow = ftxui::Renderer([&] {
