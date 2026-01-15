@@ -14,6 +14,8 @@
 
 #include "nlohmann/json.hpp"
 
+#include "Config.h"
+
 /*
 std::string ConvertCP1251ToUTF8(const std::string& str)
 {
@@ -73,7 +75,7 @@ std::string lastCommand;
 
 std::thread bg;
 
-auto screen = ftxui::ScreenInteractive::TerminalOutput();
+auto screen = ftxui::ScreenInteractive::Fullscreen();
 
 void UpdateMsgThread();
 
@@ -100,8 +102,6 @@ void Connect() {
 void SendServ(std::string request) {
 	std::lock_guard<std::mutex> lock(mtx);
 
-	std::string res = "Типо ответ от сервера";
-
 	try {
 		client.Send(request);
 	}
@@ -120,16 +120,21 @@ void UpdateMsgThread() {
 
 		client.recv_buffer_server.resize(br);
 
-		nlohmann::json js = nlohmann::json::parse(client.recv_buffer_server);
+		try {
+			nlohmann::json js = nlohmann::json::parse(client.recv_buffer_server);
 
-		if (js["type"] == "ANSWER") {
-			logs.push_back(js["message"]);
+			if (js["type"] == "ANSWER") {
+				logs.push_back(js["message"]);
+			}
+			else if (js["type"] == "MAP") {
+				map = js["message"];
+			}
+			else if (js["type"] == "SERVER") {
+				serverMessages.push_back(js["message"]);
+			}
 		}
-		else if (js["type"] == "MAP") {
-			map = js["message"];
-		}
-		else if (js["type"] == "SERVER") {
-			serverMessages.push_back(js["message"]);
+		catch (std::exception& er) {
+			logs.push_back(er.what());
 		}
 
 		screen.PostEvent(ftxui::Event::Special("refresh"));
@@ -180,15 +185,14 @@ void MainThread() {
 
 		for (const auto& log : logs) {
 			elements.push_back(
-				ftxui::paragraph(log) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 100)
+				ftxui::hflow(ftxui::paragraph(log)) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50)
 			);
 
-			elements.push_back(ftxui::text(""));
+			elements.push_back(ftxui::hflow(ftxui::paragraph("")));
 		}
 
-		return ftxui::vbox(elements) | ftxui::frame |
-			ftxui::vscroll_indicator | ftxui::focusPositionRelative(0.0f, 1.0f);
-		});
+		return ftxui::vbox(elements) | ftxui::focusPositionRelative(0.0f, 1.0f);
+	});
 
 	ftxui::Component serverWindow = ftxui::Renderer([&] {
 		std::vector<ftxui::Element> elements;
@@ -262,7 +266,7 @@ void MainThread() {
 		}
 
 		auto game_box = ftxui::vbox({
-			logWindow->Render() | ftxui::vscroll_indicator | ftxui::frame | ftxui::border | ftxui::flex,
+			logWindow->Render() | ftxui::frame | ftxui::border | ftxui::flex,
 			ftxui::hbox(ftxui::text("Команда: "), commandInput->Render()) }) | ftxui::flex;
 		auto game_window = ftxui::window(ftxui::text("Гигахрущ"), game_box) | ftxui::color(ftxui::Color::Green);
 
@@ -273,8 +277,8 @@ void MainThread() {
 		auto map_window = ftxui::window(ftxui::text("Карта"), map_box) | ftxui::color(ftxui::Color::Green) | ftxui::flex;
 
 		auto right_column = ftxui::vbox({
-			server_window,
-			map_window
+			server_window | ftxui::flex_grow,
+			map_window | ftxui::flex_grow
 		}) | ftxui::flex;  
 
 		auto main_layout = ftxui::hbox({
@@ -304,6 +308,8 @@ int main()
 	if (bg.joinable()) {
 		bg.join();
 	}
+
+	client.~Client();
 
 	/*
 	#ifdef _WIN32

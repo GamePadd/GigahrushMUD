@@ -9,7 +9,7 @@ class Server {
 		asio::ip::tcp::acceptor acceptor;
 		std::optional<asio::ip::tcp::socket> socket;
 
-		std::vector<std::shared_ptr<Session>> allSessions;
+		std::vector<std::weak_ptr<Session>> allSessions;
 
 		asio::steady_timer timer1;
 

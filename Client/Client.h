@@ -20,6 +20,8 @@ class Client {
 		asio::ip::tcp::socket socket;
 
 		Client(asio::io_context& io_context_, std::string ip, std::string port);
+		~Client();
+
 		void Connect();
 		void Send(std::string& data);
 };

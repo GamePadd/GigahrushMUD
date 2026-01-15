@@ -13,19 +13,26 @@ void Server::async_accept() {
 	acceptor.async_accept(*socket, [&](asio::error_code error) {
 		std::shared_ptr<Session> ses = std::make_shared<Session>(std::move(*socket));
 		ses->start();
-		allSessions.push_back(std::move(ses));
+		allSessions.push_back(std::weak_ptr<Session>(ses));
 		async_accept();
 	});
 }
 
 void Server::mapUpdate(const asio::error_code& ec) {
 	for (auto& it : allSessions) {
-		asio::write(it->socket, asio::buffer(Gigahrush::Game::Instance().Map(it->sessionPlayer)));
+		try {
+			if (auto p = it.lock()) {
+				asio::write(p->socket, asio::buffer(Gigahrush::Game::Instance().Map(p->sessionPlayer)));
+			}
+		}
+		catch (const std::exception& ec) {
+			std::cout << ec.what() << std::endl;
+		}
 	}
 }
 
 void Server::startMapUpdate() {
-	timer1.expires_after(asio::chrono::seconds(2));
+	timer1.expires_after(asio::chrono::milliseconds(500));
 	timer1.async_wait([this](const asio::error_code& ec) {
 		if (!ec) { mapUpdate(ec); }
 		else { return; }
