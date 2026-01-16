@@ -88,20 +88,20 @@ namespace Gigahrush {
 
 			std::string CheckLevelUp(std::shared_ptr<Player>);
 
-			std::string Map(std::shared_ptr<Player>); //JSON Done
+			std::string Map(std::shared_ptr<Player>); // JSON Done
 			std::string Me(std::shared_ptr<Player>);  // JSON Done
-			std::string Look(std::shared_ptr<Player>); //JSON Done
-			std::string Move(std::shared_ptr<Player>, std::string); //JSON Done
-			std::string Craft(std::shared_ptr<Player>, std::string);
+			std::string Look(std::shared_ptr<Player>); // JSON Done
+			std::string Move(std::shared_ptr<Player>, std::string); // JSON Done (Maybe remake system)
+			std::string Craft(std::shared_ptr<Player>, std::string); // JSON Done
 			std::string DropItem(std::shared_ptr<Player>, std::string); // JSON Done
 			std::string PickupItem(std::shared_ptr<Player>, std::string); // JSON Done
 			std::string Inventory(std::shared_ptr<Player>); // JSON Done
-			std::string ChangeFloor(std::shared_ptr<Player>, int); 
-			std::string LookItem(std::shared_ptr<Player>, std::string); // JSON Done
+			std::string ChangeFloor(std::shared_ptr<Player>, int); // JSON Done
+			std::string LookItem(std::shared_ptr<Player>, std::string); // JSON Done (Maybe remake system)
 			std::string EnableCrafts(std::shared_ptr<Player>); 
-			std::string UseItem(std::shared_ptr<Player>, std::string); // JSON Done
-			std::string Attack(std::shared_ptr<Player>); // игрок, оружие 
-			std::string Battle(std::shared_ptr<Player>, std::string); // игрок, враг 
+			std::string UseItem(std::shared_ptr<Player>, std::string); // JSON Done (Maybe remake system)
+			std::string Attack(std::shared_ptr<Player>);
+			std::string Battle(std::shared_ptr<Player>, std::string);
 			std::string Equip(std::shared_ptr<Player>, std::string); 
 			std::string RepairExit(std::shared_ptr<Player>); 
 			std::string CurrentPlayers(std::shared_ptr<Player>); 

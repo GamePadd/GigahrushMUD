@@ -1184,6 +1184,7 @@ namespace Gigahrush {
 	}
 
 	std::string Game::Craft(std::shared_ptr<Gigahrush::Player> ply, std::string item) {
+		/*
 		std::string res = "";
 		std::unordered_map<int, int> craft; //id - count;
 		std::unordered_map<int, int> enable; //id - count;
@@ -1253,7 +1254,88 @@ namespace Gigahrush {
 			res = "Предмет не найден";
 		}
 
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "Craft";
+
+		res["content"]["noItemFound"] = false;
+		res["content"]["noResources"] = false;
+		res["content"]["noCraftFound"] = false;
+
+		res["content"]["lostedItems"] = nlohmann::json::array(); 
+		res["content"]["craftedItem"] = "";
+
+		std::unordered_map<int, int> craft; //id - count;
+		std::unordered_map<int, int> enable; //id - count;
+		std::unique_ptr<Item> itemToCraft = nullptr;
+		bool itemFound = false;
+		bool hasCraft = false;
+		for (auto& it : configurator.config.items) {
+			if (it->name == item) {
+				itemToCraft = it->clone();
+				itemFound = true;
+				break;
+			}
+		}
+
+		if (itemFound) {
+			for (auto it : configurator.config.crafts) {
+				if (it.ID == itemToCraft->ID) {
+					for (auto xd : it.craft) {
+						++craft[xd];
+						hasCraft = true;
+					}
+					break;
+				}
+				else {
+					hasCraft = false;
+				}
+			}
+			if (hasCraft) {
+				//Ищем предметы в инвентаре
+				for (auto& it : ply->inventory) {
+					++enable[it->ID];
+				}
+				//Сравниваем с крафтом
+				bool canCraft = true;
+
+				for (auto [id, count] : craft) {
+					if (enable[id] < count) {
+						canCraft = false;
+						break;
+					}
+				}
+
+				if (canCraft) {
+					for (auto [id, count] : craft) {
+						int delRemain = count;
+
+						for (int i = ply->inventory.size() - 1; i >= 0 && delRemain > 0; i--) {
+							if (ply->inventory[i]->ID == id) {
+								res["content"]["lostedItems"].push_back(ply->inventory[i]->name);
+								ply->inventory.erase(ply->inventory.begin() + i);
+								--delRemain;
+							}
+						}
+					}
+					res["content"]["craftedItem"] = itemToCraft->name;
+					ply->inventory.push_back(std::move(itemToCraft));
+				}
+				else {
+					res["content"]["noResources"] = true;
+				}
+			}
+			else {
+				res["content"]["noCraftFound"] = true;
+			}
+		}
+		else {
+			res["content"]["noItemFound"] = true;
+		}
+
+		return res.dump(); 
 	}
 
 	std::string Game::DropItem(std::shared_ptr<Gigahrush::Player> ply, std::string item) {
@@ -1423,7 +1505,8 @@ namespace Gigahrush {
 		return res.dump();
 	}
 
-	std::string Game::ChangeFloor(std::shared_ptr<Player> ply, int dir) { 
+	std::string Game::ChangeFloor(std::shared_ptr<Player> ply, int dir) {
+		/*
 		//1 - up 0 - down
 		std::string res = "";
 		std::shared_ptr<Floor> flrToChange = nullptr;
@@ -1485,6 +1568,91 @@ namespace Gigahrush {
 		}
 		else {
 			res = "Вы не можете поменять этаж в этой комнате";
+		}
+
+		if (canChange) {
+			ply->location = roomToChange;
+			ply->floor = flrToChange;
+		}
+
+		return res;*/
+
+		//1 - up 0 - down
+		
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "ChangeFloor";
+
+		res["content"]["isElevatorBroken"] = false;
+		res["content"]["isPlayerBrokeElevator"] = false;
+		res["content"]["canGoUp"] = true;
+		res["content"]["canGoDown"] = true;
+		res["content"]["moveType"] = dir; //up down 1 0 
+		res["content"]["changed"] = false;
+		res["content"]["canChange"] = true;
+		res["content"]["changedFloor"] = 0;
+
+		std::shared_ptr<Floor> flrToChange = nullptr;
+		std::shared_ptr<Room> roomToChange = nullptr;
+
+		bool canChange = false;
+
+		ExitRoom* rmm = dynamic_cast<ExitRoom*>(ply->location.get());
+
+		if (rmm != nullptr) {
+			if (rand() % 100 < 5) {
+				rmm->isBroken = true;
+				res["content"]["isPlayerBrokeElevator"] = true;
+			}
+		}
+
+		if (rmm != nullptr && rmm->isBroken == true) {
+			res["content"]["isElevatorBroken"] = true;
+		}
+
+		if (ply->location->isExit == true) {
+			if (dir == 0)
+				if (ply->floor->canGoDown == true) {
+					for (auto& it : gamedata.floors) {
+						if (it->level == ply->floor->level - 1) {
+							flrToChange = it;
+							for (auto& at : it->rooms) {
+								if (at->location == it->exitCoordinates) {
+									roomToChange = at;
+									canChange = true;
+									res["content"]["changedFloor"] = it->level;
+									res["content"]["changed"] = true;
+								}
+							}
+						}
+					}
+				}
+				else {
+					res["content"]["canGoDown"] = false;
+				}
+			else if (dir == 1) {
+				if (ply->floor->canGoUp == true) {
+					for (auto& it : gamedata.floors) {
+						if (it->level == ply->floor->level + 1) {
+							flrToChange = it;
+							for (auto& at : it->rooms) {
+								if (at->location == it->exitCoordinates) {
+									roomToChange = at;
+									canChange = true;
+									res["content"]["changedFloor"] = it->level;
+									res["content"]["changed"] = true;
+								}
+							}
+						}
+					}
+				}
+				else {
+					res["content"]["canGoDown"] = false;
+				}
+			}
+		}
+		else {
+			res["content"]["canChange"] = false;
 		}
 
 		if (canChange) {
