@@ -11,3 +11,4 @@ constexpr ftxui::Color::Palette16 ENEMY_COLOR = ftxui::Color::Red;
 constexpr ftxui::Color::Palette16 DECORATE_COLOR = ftxui::Color::White;
 
 constexpr ftxui::Color::Palette16 ADD_COLOR1 = ftxui::Color::Yellow;
+constexpr ftxui::Color::Palette16 ADD_COLOR2 = ftxui::Color::Green;

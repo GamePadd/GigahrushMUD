@@ -262,7 +262,7 @@ void MainThread() {
 		auto game_window = ftxui::window(ftxui::text("Гигахрущ"), game_box) | ftxui::color(MAIN_COLOR);
 
 		auto server_box = ftxui::vbox({ serverWindow->Render() | ftxui::vscroll_indicator | ftxui::frame | ftxui::flex }) | ftxui::flex;
-		auto server_window = ftxui::window(ftxui::text("Оповещения сервера"), server_box) | ftxui::color(MAIN_COLOR) | ftxui::flex;
+		auto server_window = ftxui::window(ftxui::text("Оповещения сервера"), server_box) | ftxui::color(ADD_COLOR2) | ftxui::flex;
 
 		auto map_box = ftxui::vbox({ mapWindow->Render() | ftxui::vscroll_indicator | ftxui::frame | ftxui::flex }) | ftxui::flex;
 		auto map_window = ftxui::window(ftxui::text("Карта"), map_box) | ftxui::color(ADD_COLOR1) | ftxui::flex;
