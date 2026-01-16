@@ -17,8 +17,9 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50)) ;
 
 		logs.push_back(ftxui::hflow({
-			ftxui::paragraph("Координаты: ["), ftxui::paragraph(std::to_string(obj["content"]["coordinates"]["x"].get<int>())), ftxui::paragraph(", "),
-			ftxui::paragraph(std::to_string(obj["content"]["coordinates"]["y"].get<int>())), ftxui::paragraph("]"),
+			ftxui::paragraph("Координаты: [") | ftxui::color(DECORATE_COLOR), 
+			ftxui::paragraph(std::to_string(obj["content"]["coordinates"]["x"].get<int>())) | ftxui::color(DECORATE_COLOR), ftxui::paragraph(", ") | ftxui::color(DECORATE_COLOR),
+			ftxui::paragraph(std::to_string(obj["content"]["coordinates"]["y"].get<int>())) | ftxui::color(DECORATE_COLOR), ftxui::paragraph("]") | ftxui::color(DECORATE_COLOR),
 		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 
 		//Пустая затычка v
@@ -219,11 +220,15 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 			++c;
 		}
 	}
-	else if (obj["content"]["type"] == "") {
-
+	else if (obj["content"]["type"] == "LookItem") {
+		logs.push_back(ftxui::hflow({
+			ftxui::paragraph(obj["content"]["res"].get<std::string>()) | ftxui::color(DECORATE_COLOR)
+		}));
 	}
-	else if (obj["content"]["type"] == "") {
-
+	else if (obj["content"]["type"] == "UseItem") {
+		logs.push_back(ftxui::hflow({
+			ftxui::paragraph(obj["content"]["res"].get<std::string>()) | ftxui::color(DECORATE_COLOR)
+		}));
 	}
 	else if (obj["content"]["type"] == "") {
 

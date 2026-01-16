@@ -92,14 +92,14 @@ namespace Gigahrush {
 			std::string Me(std::shared_ptr<Player>);  // JSON Done
 			std::string Look(std::shared_ptr<Player>); //JSON Done
 			std::string Move(std::shared_ptr<Player>, std::string); //JSON Done
-			std::string Craft(std::shared_ptr<Player>, std::string); 
+			std::string Craft(std::shared_ptr<Player>, std::string);
 			std::string DropItem(std::shared_ptr<Player>, std::string); // JSON Done
 			std::string PickupItem(std::shared_ptr<Player>, std::string); // JSON Done
 			std::string Inventory(std::shared_ptr<Player>); // JSON Done
 			std::string ChangeFloor(std::shared_ptr<Player>, int); 
-			std::string LookItem(std::shared_ptr<Player>, std::string); 
+			std::string LookItem(std::shared_ptr<Player>, std::string); // JSON Done
 			std::string EnableCrafts(std::shared_ptr<Player>); 
-			std::string UseItem(std::shared_ptr<Player>, std::string); 
+			std::string UseItem(std::shared_ptr<Player>, std::string); // JSON Done
 			std::string Attack(std::shared_ptr<Player>); // игрок, оружие 
 			std::string Battle(std::shared_ptr<Player>, std::string); // игрок, враг 
 			std::string Equip(std::shared_ptr<Player>, std::string); 

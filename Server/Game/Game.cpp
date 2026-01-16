@@ -1496,6 +1496,7 @@ namespace Gigahrush {
 	}
 
 	std::string Game::LookItem(std::shared_ptr<Player> ply, std::string item) {
+		/*
 		std::string res = "У вас не такого предмета или такого врага нет в комнате";
 
 		for (auto& it : ply->inventory) {
@@ -1512,7 +1513,28 @@ namespace Gigahrush {
 			}
 		}
 
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "LookItem";
+		res["content"]["res"] = "У вас нет такого предмета или такого врага нет в комнате";
+
+		for (auto& it : ply->inventory) {
+			if (it->name == item) {
+				res["content"]["res"] = it->getDescription();
+				break;
+			}
+		}
+
+		for (auto& it : ply->location->enemies) {
+			if (it->name == item) {
+				res["content"]["res"] = it->name + ": " + it->description + "\nЗдоровье: " + std::to_string(it->health) + "\nУрон: " + std::to_string(it->attack);
+				break;
+			}
+		}
+
+		return res.dump(); 
 	}
 
 	std::string Game::EnableCrafts(std::shared_ptr<Player> ply) {
@@ -1554,6 +1576,7 @@ namespace Gigahrush {
 	}
 
 	std::string Game::UseItem(std::shared_ptr<Player> ply, std::string item) {
+		/*
 		std::string res = "У вас нет этого предмета";
 		for (int i = 0; i < ply->inventory.size(); i++) {
 			if (ply->inventory[i]->name == item) {
@@ -1571,7 +1594,30 @@ namespace Gigahrush {
 			res += CheckPlayerDeath(ply);
 		}
 
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "UseItem";
+		res["content"]["res"] = "У вас нет этого предмета";
+
+		for (int i = 0; i < ply->inventory.size(); i++) {
+			if (ply->inventory[i]->name == item) {
+				std::pair<std::string, bool> useRes = ply->inventory[i]->use(ply);
+				res["content"]["res"] = useRes.first;
+				if (useRes.second == true) {
+					ply->inventory.erase(ply->inventory.begin() + i);
+				}
+				break;
+			}
+		}
+
+		if (ply->battleStatus.status == InBattle) {
+			res["content"]["res"] += ply->battleStatus.enemy->Attack(ply);
+			res["content"]["res"] += CheckPlayerDeath(ply);
+		}
+
+		return res.dump();
 	}
 
 	std::string Game::CheckLevelUp(std::shared_ptr<Player> ply) {
