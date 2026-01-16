@@ -2009,6 +2009,7 @@ namespace Gigahrush {
 	}
 
 	std::string Game::Equip(std::shared_ptr<Player> ply, std::string wepName) {
+		/*
 		std::string res = "Не найден предмет";
 
 		for (auto& it : ply->inventory) {
@@ -2024,10 +2025,34 @@ namespace Gigahrush {
 			}
 		}
 
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "Equip";
+		res["content"]["equiped"] = false;
+		res["content"]["canEquip"] = true;
+		res["content"]["wep"] = "";
+
+		for (auto& it : ply->inventory) {
+			if (it->name == wepName) {
+				Weapon* wep = dynamic_cast<Weapon*>(it.get());
+				if (wep) {
+					res["content"]["wep"] = wep->equip(ply);
+					res["content"]["equiped"] = true;
+					break;
+				}
+				else {
+					res["content"]["canEquip"] = false;
+				}
+			}
+		}
+
+		return res.dump(); 
 	}
 
 	std::string Game::RepairExit(std::shared_ptr<Player> ply) {
+		/*
 		std::string res = "";
 
 		ExitRoom* rmm = dynamic_cast<ExitRoom*>(ply->location.get());
@@ -2084,7 +2109,76 @@ namespace Gigahrush {
 		rmm->isBroken = false;
 		res += "\nВы починили выход";
 
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "RepairExit";
+		res["content"]["isExitBroken"] = true;
+		res["content"]["canFixThisRoom"] = true;
+		res["content"]["haveResources"] = true;
+
+		res["content"]["needRes"] = nlohmann::json::array();
+		res["content"]["lostedItems"] = nlohmann::json::array();
+
+		res["content"]["repaired"] = false;
+
+		ExitRoom* rmm = dynamic_cast<ExitRoom*>(ply->location.get());
+
+		if (rmm != nullptr && rmm->isBroken == false) { res["content"]["isExitBroken"] = false; return res.dump(); }
+		if (rmm == nullptr) { res["content"]["canFixThisRoom"] = false; return res.dump(); }
+
+		std::unordered_map<int, int> recipe;
+		std::unordered_map<int, int> inv;
+
+		//Repairing
+
+		for (auto& it : rmm->repairRecipe) {
+			recipe[it] += 1;
+		}
+
+		for (auto& it : ply->inventory) {
+			inv[it->ID] += 1;
+		}
+
+		bool canRepair = true;
+
+		for (auto [id, count] : recipe) {
+			if (inv[id] < count) {
+				canRepair = false;
+				res["content"]["haveResources"] = false;
+				for (auto [id, count] : recipe) {
+					for (auto& it : configurator.config.items) {
+						if (it->ID == id) {
+							res["content"]["needRes"].push_back({
+								{"name", it->name},
+								{"count", count}
+							});
+						}
+					}
+				}
+				return res.dump();
+			}
+		}
+
+		if (canRepair) {
+			for (auto [id, count] : recipe) {
+				int delRemain = count;
+
+				for (int i = ply->inventory.size() - 1; i >= 0 && delRemain > 0; i--) {
+					if (ply->inventory[i]->ID == id) {
+						res["content"]["lostedItems"].push_back(ply->inventory[i]->name);
+						ply->inventory.erase(ply->inventory.begin() + i);
+						--delRemain;
+					}
+				}
+			}
+		}
+
+		rmm->isBroken = false;
+		res["content"]["repaired"] = true;
+
+		return res.dump(); 
 	}
 
 	std::string Game::CurrentPlayers(std::shared_ptr<Player> ply) {
