@@ -914,6 +914,7 @@ namespace Gigahrush {
 	}
 
 	std::string Game::Me(std::shared_ptr<Gigahrush::Player> ply) {
+		/*
 		std::string res = "Имя: " + ply->username + "\n" +
 			"Уровень: " + std::to_string(ply->stats.level) + "\n" +
 			"Текущий опыт: " + std::to_string(ply->stats.currentExp) + "\n" +
@@ -932,7 +933,32 @@ namespace Gigahrush {
 			}
 		}
 
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "Me";
+
+		res["content"]["username"] = ply->username;
+		res["content"]["level"] = ply->stats.level;
+		res["content"]["exp"] = ply->stats.currentExp;
+		res["content"]["expToLU"] = ply->stats.expTolevelUp;
+		res["content"]["maxInventory"] = ply->stats.inventoryMaxSize;
+		res["content"]["health"] = ply->stats.health;
+		res["content"]["armor"] = ply->stats.armor;
+		res["content"]["weaponSkill"] = ply->stats.weaponSkill;
+		res["content"]["currentWeapon"] = "";
+
+		if (ply->stats.wepEq) {
+			for (auto& it : ply->inventory) {
+				if (it->ID == ply->stats.weaponEqID) {
+					res["content"]["currentWeapon"] = it->name;
+					break;
+				}
+			}
+		}
+
+		return res.dump();
 	}
 
 	std::string Game::Map(std::shared_ptr<Player> ply) {
@@ -1374,6 +1400,7 @@ namespace Gigahrush {
 	}
 
 	std::string Game::Inventory(std::shared_ptr<Player> ply) {
+		/*
 		std::string res = "Ваш инвентарь:";
 		size_t i = 1;
 
@@ -1382,7 +1409,18 @@ namespace Gigahrush {
 			++i;
 		}
 
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "Inventory";
+		res["content"]["items"] = nlohmann::json::array();
+
+		for (auto& it : ply->inventory) {
+			res["content"]["items"].push_back(it->name);
+		}
+
+		return res.dump();
 	}
 
 	std::string Game::ChangeFloor(std::shared_ptr<Player> ply, int dir) { 

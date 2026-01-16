@@ -172,6 +172,59 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 			}));
 		}
 	}
+	else if (obj["content"]["type"] == "Me") {
+
+		logs.push_back(ftxui::hflow({
+			ftxui::text("Имя: ") | ftxui::color(DECORATE_COLOR), ftxui::text(obj["content"]["username"].get<std::string>()) | ftxui::color(ITEM_COLOR)
+		}));
+		logs.push_back(ftxui::hflow({
+			ftxui::text("Уровень: ") | ftxui::color(DECORATE_COLOR), ftxui::text(std::to_string(obj["content"]["level"].get<int>())) | ftxui::color(ITEM_COLOR)
+		}));
+		logs.push_back(ftxui::hflow({
+			ftxui::text("Текущий опыт: ") | ftxui::color(DECORATE_COLOR), ftxui::text(std::to_string(obj["content"]["exp"].get<int>())) | ftxui::color(ITEM_COLOR)
+		}));
+		logs.push_back(ftxui::hflow({
+			ftxui::text("Опыта до следующего уровня: ") | ftxui::color(DECORATE_COLOR), ftxui::text(std::to_string(obj["content"]["expToLU"].get<int>())) | ftxui::color(ITEM_COLOR)
+			}));
+		logs.push_back(ftxui::hflow({
+			ftxui::text("Вместимость инвентаря: ") | ftxui::color(DECORATE_COLOR), ftxui::text(std::to_string(obj["content"]["maxInventory"].get<int>())) | ftxui::color(ITEM_COLOR)
+			}));
+		logs.push_back(ftxui::hflow({
+			ftxui::text("Здоровье: ") | ftxui::color(DECORATE_COLOR), ftxui::text(std::to_string(obj["content"]["health"].get<int>())) | ftxui::color(ITEM_COLOR)
+		}));
+		logs.push_back(ftxui::hflow({
+			ftxui::text("Броня: ") | ftxui::color(DECORATE_COLOR), ftxui::text(std::to_string(obj["content"]["armor"].get<int>())) | ftxui::color(ITEM_COLOR)
+			}));
+		logs.push_back(ftxui::hflow({
+			ftxui::text("Навык владения оружием: ") | ftxui::color(DECORATE_COLOR), ftxui::text(std::to_string(obj["content"]["weaponSkill"].get<int>())) | ftxui::color(ITEM_COLOR)
+		}));
+
+		if (obj["content"]["currentWeapon"] != "") {
+			logs.push_back(ftxui::hflow({
+				ftxui::text("Текущее оружие: ") | ftxui::color(DECORATE_COLOR), ftxui::text(obj["content"]["currentWeapon"].get<std::string>()) | ftxui::color(ITEM_COLOR)
+			}));
+		}
+	}
+	else if (obj["content"]["type"] == "Inventory") {
+		logs.push_back(ftxui::hflow({
+			ftxui::text("Инвентарь: ") | ftxui::color(DECORATE_COLOR)
+		}));
+
+		std::vector<std::string> invItems = obj["content"]["items"].get<std::vector<std::string>>();
+		c = 1;
+		for (auto it : invItems) {
+			logs.push_back(ftxui::hflow({
+				ftxui::text(std::to_string(c) + ". ") | ftxui::color(DECORATE_COLOR), ftxui::text(it) | ftxui::color(ITEM_COLOR)
+			}));
+			++c;
+		}
+	}
+	else if (obj["content"]["type"] == "") {
+
+	}
+	else if (obj["content"]["type"] == "") {
+
+	}
 	else if (obj["content"]["type"] == "") {
 
 	}
