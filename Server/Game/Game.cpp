@@ -1467,7 +1467,7 @@ namespace Gigahrush {
 							break;
 						}
 						else {
-							res["content"]["isInventoryFull"] = "Ваш инвентарь полон";
+							res["content"]["isInventoryFull"] = true;
 							break;
 						}
 					}
@@ -1835,6 +1835,7 @@ namespace Gigahrush {
 	}
 
 	std::string Game::CheckLevelUp(std::shared_ptr<Player> ply) {
+		/*
 		std::string res = "";
 
 		if (ply->stats.currentExp < ply->stats.expTolevelUp) { return ""; }
@@ -1851,9 +1852,32 @@ namespace Gigahrush {
 			"Текущий опыт: " + std::to_string(ply->stats.currentExp) + "\n";
 
 		return res;
+		*/
+
+		nlohmann::json res;
+		res["isLevelUp"] = false;
+		res["newLevel"] = 0;
+		res["nextLevelExp"] = 0;
+		res["currentExp"] = 0;
+
+		if (ply->stats.currentExp < ply->stats.expTolevelUp) { return res.dump(); }
+		res["isLevelUp"] = true;
+		ply->stats.currentExp -= ply->stats.expTolevelUp;
+		ply->stats.expTolevelUp *= 1.1;
+		ply->stats.level += 1;
+
+		ply->stats.weaponSkill += 1;
+		ply->stats.inventoryMaxSize += 1;
+
+		res["newLevel"] = ply->stats.level;
+		res["nextLevelExp"] = ply->stats.expTolevelUp;
+		res["currentExp"] = ply->stats.currentExp;
+
+		return res.dump();
 	}
 
 	std::string Game::Attack(std::shared_ptr<Player> ply) {
+		/*
 		if (ply->battleStatus.status != InBattle) { return "Вы не в битве"; }
 
 		std::string res = "У вас не экипировано оружие";
@@ -1928,7 +1952,112 @@ namespace Gigahrush {
 			res += CheckPlayerDeath(ply);
 		}
 
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "Attack";
+		res["content"]["inBattle"] = true;
+		res["content"]["wepEquiped"] = true;
+
+		res["content"]["enemyName"] = "";
+
+		res["content"]["makeDamage"] = 0;
+		res["content"]["skillDamage"] = 0;
+		res["content"]["enemyRemainHealth"] = 0;
+
+		res["content"]["isEnemyDead"] = false;
+		res["content"]["winExp"] = 0;
+		res["content"]["itemFromEnemy"] = "";
+
+		res["content"]["enemyStep"] = nlohmann::json::object();
+		res["content"]["checkPlayerDeath"] = nlohmann::json::object();
+		res["content"]["levelUp"] = nlohmann::json::object();
+
+		if (ply->battleStatus.status != InBattle) { res["content"]["inBattle"] = false; return res.dump(); }
+
+		bool isEnemyDead = false;
+
+		if (ply->stats.wepEq == false) {
+			res["content"]["wepEquiped"] = false;
+
+			if (isEnemyDead == false) {
+				res["content"]["enemyStep"] = nlohmann::json::parse(ply->battleStatus.enemy->Attack(ply));
+				res["content"]["checkPlayerDeath"] = nlohmann::json::parse(CheckPlayerDeath(ply));
+			}
+
+			return res.dump();
+		}
+
+		for (auto& it : ply->inventory) {
+			if (it->ID == ply->stats.weaponEqID) {
+				Weapon* wep = dynamic_cast<Weapon*>(it.get());
+				if (wep != nullptr) {
+					ply->battleStatus.enemy->health = std::clamp(ply->battleStatus.enemy->health - (wep->damage + ply->stats.weaponSkill), 0, 1000);
+					
+					res["content"]["enemyName"] = ply->battleStatus.enemy->name;
+					res["content"]["makeDamage"] = wep->damage;
+					res["content"]["skillDamage"] = ply->stats.weaponSkill;
+					res["content"]["enemyRemainHealth"] = ply->battleStatus.enemy->health;
+
+					if (ply->battleStatus.enemy->health <= 0) {
+						ply->stats.currentExp += ply->battleStatus.enemy->exp;
+
+						isEnemyDead = true;
+						
+						res["content"]["isEnemyDead"] = true;
+						res["content"]["winExp"] = ply->battleStatus.enemy->exp;
+
+						int randItemFromEnemyID = 0;
+
+						res["content"]["levelUp"] = nlohmann::json::parse(CheckLevelUp(ply));
+
+						if (ply->battleStatus.enemy->loot.size() != 1) {
+							randItemFromEnemyID = ply->battleStatus.enemy->loot[rand() % (ply->battleStatus.enemy->loot.size() - 1)]->ID;
+						}
+						else {
+							randItemFromEnemyID = ply->battleStatus.enemy->loot[0]->ID;
+						}
+
+						for (auto& it : configurator.config.items) {
+							if (it->ID == randItemFromEnemyID) {
+								ply->inventory.push_back(it->clone());
+								res["content"]["itemFromEnemy"] = it->name;
+								break;
+							}
+						}
+
+						for (int j = 0; j < ply->location->enemyDescription.size(); j++) {
+							if (ply->location->enemyDescription[j].ID == ply->battleStatus.enemy->ID) {
+								ply->location->enemyDescription.erase(ply->location->enemyDescription.begin() + j);
+								break;
+							}
+						}
+
+						for (int i = 0; i < ply->location->enemies.size(); i++) {
+							if (ply->location->enemies[i]->battleWith != nullptr) {
+								if (ply->location->enemies[i]->battleWith->username == ply->username) {
+									ply->location->enemies.erase(ply->location->enemies.begin() + i);
+									break;
+								}
+							}
+						}
+
+						ply->battleStatus.enemy->battleWith = nullptr;
+						ply->battleStatus.status = NotInBattle;
+						break;
+					}
+					break;
+				}
+			}
+		}
+
+		if (isEnemyDead == false) {
+			res["content"]["enemyStep"] = nlohmann::json::parse(ply->battleStatus.enemy->Attack(ply));
+			res["content"]["checkPlayerDeath"] = nlohmann::json::parse(CheckPlayerDeath(ply));
+		}
+
+		return res.dump();
 	}
 
 	std::string Game::Battle(std::shared_ptr<Player> ply, std::string enemyName) {
@@ -2340,11 +2469,20 @@ namespace Gigahrush {
 		commandhandler.add("битва", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Battle(ply, arg); }, 1, false);
 		commandhandler.add("экипировать", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Equip(ply, arg); }, 1, true);
 		commandhandler.add("пропустить", [this](std::shared_ptr<Player> ply, std::string arg) {
-			if (ply->battleStatus.status != InBattle) { return std::string("Вы не в битве!"); }
-			std::string res = "Вы пропустили ход";
-			res += ply->battleStatus.enemy->Attack(ply);
-			res += this->CheckPlayerDeath(ply);
-			return res;
+			nlohmann::json res;
+			res["type"] = "ANSWER";
+			res["content"]["type"] = "Skip";
+			res["content"]["inBattle"] = true;
+
+			res["content"]["enemyStep"] = nlohmann::json::object();
+			res["content"]["checkPlayerDeath"] = nlohmann::json::object();
+
+			if (ply->battleStatus.status != InBattle) { res["content"]["inBattle"] = false; return res.dump(); }
+
+			res["content"]["enemyStep"] = nlohmann::json::parse(ply->battleStatus.enemy->Attack(ply));
+			res["content"]["checkPlayerDeath"] = nlohmann::json::parse(CheckPlayerDeath(ply));
+
+			return res.dump();
 			}, 0, true);
 	}
 

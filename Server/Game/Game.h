@@ -86,7 +86,7 @@ namespace Gigahrush {
 
 			//Commands
 
-			std::string CheckLevelUp(std::shared_ptr<Player>);
+			std::string CheckLevelUp(std::shared_ptr<Player>); // JSON Done
 
 			std::string Map(std::shared_ptr<Player>); // JSON Done
 			std::string Me(std::shared_ptr<Player>);  // JSON Done
@@ -100,7 +100,7 @@ namespace Gigahrush {
 			std::string LookItem(std::shared_ptr<Player>, std::string); // JSON Done (remake system)
 			std::string EnableCrafts(std::shared_ptr<Player>); // JSON Done
 			std::string UseItem(std::shared_ptr<Player>, std::string); // JSON Done (remake system)
-			std::string Attack(std::shared_ptr<Player>); //
+			std::string Attack(std::shared_ptr<Player>); // JSON Done
 			std::string Battle(std::shared_ptr<Player>, std::string); // JSON Done
 			std::string Equip(std::shared_ptr<Player>, std::string); // JSON Done
 			std::string RepairExit(std::shared_ptr<Player>); // JSON Done
