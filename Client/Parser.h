@@ -253,7 +253,7 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 		std::vector<std::string> losted = obj["content"]["lostedItems"].get<std::vector<std::string>>();
 
 		logs.push_back(ftxui::hflow({
-			ftxui::paragraph("Вы скрафтили предмет ") | ftxui::color(DECORATE_COLOR),
+			ftxui::text("Вы скрафтили предмет ") | ftxui::color(DECORATE_COLOR),
 			ftxui::paragraph(obj["content"]["craftedItem"].get<std::string>()) | ftxui::color(ITEM_COLOR)
 		}));
 
@@ -320,8 +320,21 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 			}
 		}
 	}
-	else if (obj["content"]["type"] == "") {
+	else if (obj["content"]["type"] == "Recipes") {
+		std::vector<std::string> recipes = obj["content"]["enableCrafts"].get<std::vector<std::string>>();
 
+		logs.push_back(ftxui::hflow({
+			ftxui::text("Доступные крафты: ") | ftxui::color(DECORATE_COLOR)
+		}));
+
+		c = 1;
+
+		for (auto it : recipes) {
+			logs.push_back(ftxui::hflow({
+				ftxui::text(std::to_string(c) + ". ") | ftxui::color(DECORATE_COLOR), ftxui::text(it) | ftxui::color(ITEM_COLOR)
+				}));
+			++c;
+		}
 	}
 	else if (obj["content"]["type"] == "") {
 

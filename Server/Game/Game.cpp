@@ -1708,6 +1708,7 @@ namespace Gigahrush {
 	}
 
 	std::string Game::EnableCrafts(std::shared_ptr<Player> ply) {
+		/*
 		std::string res = "Доступные крафты: ";
 
 		std::unordered_map<int, int> plyInv;
@@ -1742,7 +1743,46 @@ namespace Gigahrush {
 			}
 		}
 
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "Recipes";
+		res["content"]["enableCrafts"] = nlohmann::json::array();
+
+		std::unordered_map<int, int> plyInv;
+		std::vector<int> recipesCanBeCrafted;
+
+		for (auto& it : ply->inventory) {
+			++plyInv[it->ID];
+		}
+
+		for (auto it : configurator.config.crafts) {
+			bool canCraft = true;
+			std::unordered_map<int, int> recipe;
+			for (auto& cr : it.craft) {
+				++recipe[cr];
+			}
+
+			for (auto [id, count] : recipe) {
+				if (plyInv[id] < count) { canCraft = false; break; };
+			}
+
+			if (canCraft) {
+				recipesCanBeCrafted.push_back(it.ID);
+			}
+		}
+		size_t counter = 1;
+		for (auto x : recipesCanBeCrafted) {
+			for (auto& it : configurator.config.items) {
+				if (x == it->ID) {
+					res["content"]["enableCrafts"].push_back(it->name);
+					break;
+				}
+			}
+		}
+
+		return res.dump(); 
 	}
 
 	std::string Game::UseItem(std::shared_ptr<Player> ply, std::string item) {
