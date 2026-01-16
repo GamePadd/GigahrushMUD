@@ -1,6 +1,7 @@
 ﻿#include "CommandHandler.h"
 #include <sstream>
 #include <vector>
+#include "nlohmann/json.hpp"
 
 namespace Gigahrush {
 	void CommandHandler::add(const std::string& name, std::function<std::string(std::shared_ptr<Player>)> func, int argc, bool allowedInBattle) {
@@ -22,13 +23,17 @@ namespace Gigahrush {
 
 		auto comm = commands.find(commandS);
 
-		if (comm == commands.end()) { return "Неизвестная команда"; }
-		if (commands[commandS].allowedInBattle == false && inBattle) { return "Вы не можете использовать эту команду в бою"; }
+		nlohmann::json rs;
+		rs["type"] = "ANSWER";
+		rs["content"]["type"] = "";
+
+		if (comm == commands.end()) { rs["content"]["type"] = "unknown"; return rs.dump(); }
+		if (commands[commandS].allowedInBattle == false && inBattle) { rs["content"]["type"] =  "inBattle"; return rs.dump();}
 		if (commands[commandS].argc == 0) {
 			return commands[commandS].func(ply, "");
 		}
 		else {
-			if (arg == "") { return "Неправильный синтаксис"; }
+			if (arg == "") { rs["content"]["type"] = "badSyntax"; return rs.dump();}
 			return commands[commandS].func(ply, arg);
 
 			/*

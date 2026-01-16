@@ -230,8 +230,20 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 			ftxui::paragraph(obj["content"]["res"].get<std::string>()) | ftxui::color(DECORATE_COLOR)
 		}));
 	}
-	else if (obj["content"]["type"] == "") {
-
+	else if (obj["content"]["type"] == "unknown") {
+		logs.push_back(ftxui::hflow({
+			ftxui::paragraph("Неизвестная команда!") | ftxui::color(ENEMY_COLOR)
+		}));
+	}
+	else if (obj["content"]["type"] == "inBattle") {
+		logs.push_back(ftxui::hflow({
+			ftxui::paragraph("Вы не можете использовать эту команду в бою!") | ftxui::color(ENEMY_COLOR)
+		}));
+	}
+	else if (obj["content"]["type"] == "badSyntax") {
+		logs.push_back(ftxui::hflow({
+			ftxui::paragraph("Неправильный синтаксис!") | ftxui::color(ENEMY_COLOR)
+		}));
 	}
 	else if (obj["content"]["type"] == "") {
 
