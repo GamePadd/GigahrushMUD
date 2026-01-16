@@ -1231,6 +1231,7 @@ namespace Gigahrush {
 	}
 
 	std::string Game::DropItem(std::shared_ptr<Gigahrush::Player> ply, std::string item) {
+		/*
 		std::string res = "У вас нет этого предмета в инвентаре";
 		for (int i = 0; i < ply->inventory.size(); i++) {
 			if (ply->inventory[i]->name == item) {
@@ -1257,10 +1258,45 @@ namespace Gigahrush {
 				break;
 			}
 		}
-		return res;
+		return res;*/
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "Drop";
+		res["content"]["dropped"] = "";
+		res["content"]["itemFound"] = false;
+
+		for (int i = 0; i < ply->inventory.size(); i++) {
+			if (ply->inventory[i]->name == item) {
+				if (ply->inventory[i]->ID == ply->stats.weaponEqID) {
+					ply->stats.weaponEqID = 0;
+					ply->stats.wepEq = false;
+				}
+
+				ply->location->items.push_back(ply->inventory[i]->clone());
+				res["content"]["dropped"] = ply->inventory[i]->name;
+				res["content"]["itemFound"] = true;
+
+				std::string phrase = "";
+				for (auto& it : configurator.config.roomDescs) {
+					if (ply->location->ID == it.ID) {
+						if (it.itemDescs.size() == 1) {
+							phrase = std::vformat(std::string_view(it.itemDescs[0]), std::make_format_args(item));
+						}
+						else {
+							phrase = std::vformat(std::string_view(it.itemDescs[rand() % it.itemDescs.size()]), std::make_format_args(item));
+						}
+					}
+				}
+				ply->location->itemDescription.push_back(RoomDescElement(ply->inventory[i]->ID, phrase));
+				ply->inventory.erase(ply->inventory.begin() + i);
+				break;
+			}
+		}
+		return res.dump();
 	}
 
 	std::string Game::PickupItem(std::shared_ptr<Gigahrush::Player> ply, std::string item) {
+		/*
 		std::string res = "Этого предмета нет в комнате";
 
 		if (ply->location->enemies.size() != 0) {
@@ -1293,6 +1329,48 @@ namespace Gigahrush {
 		}
 
 		return res;
+		*/
+
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "Pickup";
+		res["content"]["canPickup"] = true;
+		res["content"]["item"] = "";
+		res["content"]["pickuped"] = false;
+		res["content"]["isInventoryFull"] = false;
+
+		if (ply->location->enemies.size() != 0) {
+			res["content"]["canPickup"] = false;
+			return res.dump();
+		}
+
+		bool isFound = false;
+		for (int i = 0; i < ply->location->items.size(); i++) {
+			if (ply->location->items[i]->name == item) {
+				for (int j = 0; j < ply->location->itemDescription.size(); j++) {
+					if (ply->location->itemDescription[j].ID == ply->location->items[i]->ID) {
+						if (ply->inventory.size() < ply->stats.inventoryMaxSize) {
+							ply->inventory.push_back(ply->location->items[i]->clone());
+							res["content"]["item"] = ply->location->items[i]->name;
+							res["content"]["pickuped"] = true;
+							ply->location->items.erase(ply->location->items.begin() + i);
+							ply->location->itemDescription.erase(ply->location->itemDescription.begin() + j);
+							isFound = true;
+							break;
+						}
+						else {
+							res["content"]["isInventoryFull"] = "Ваш инвентарь полон";
+							break;
+						}
+					}
+				}
+			}
+			if (isFound) {
+				break;
+			}
+		}
+
+		return res.dump();
 	}
 
 	std::string Game::Inventory(std::shared_ptr<Player> ply) {

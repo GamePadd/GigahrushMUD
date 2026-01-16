@@ -134,4 +134,48 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 		nlohmann::json lookObj = obj["content"]["look"].get<nlohmann::json>();
 		if (!lookObj.empty()) { addLog(logs,lookObj); }
 	}
+	else if (obj["content"]["type"] == "Pickup") {
+		if (obj["content"]["canPickup"] == false) {
+			logs.push_back(ftxui::hflow({
+				ftxui::text("Вы не можете подбирать предметы пока в комнате есть враги!") | ftxui::color(ENEMY_COLOR)
+			}));
+		}
+		else {
+			if (obj["content"]["isInventoryFull"] == true) {
+				logs.push_back(ftxui::hflow({
+					ftxui::text("Ваш инвентарь полон!") | ftxui::color(ENEMY_COLOR)
+				}));
+			}
+			else {
+				if (obj["content"]["pickuped"].get<bool>() == true) {
+					logs.push_back(ftxui::hflow({
+						ftxui::text("Вы подобрали ") | ftxui::color(DECORATE_COLOR), ftxui::text(obj["content"]["item"].get<std::string>()) | ftxui::color(ITEM_COLOR)
+					}));
+				}
+				else {
+					logs.push_back(ftxui::hflow({
+						ftxui::text("Этого предмета нет в комнате") | ftxui::color(ENEMY_COLOR)
+					}));
+				}
+			}
+		}
+	}
+	else if (obj["content"]["type"] == "Drop") {
+		if (obj["content"]["itemFound"] == false) {
+			logs.push_back(ftxui::hflow({
+				ftxui::text("У вас нет этого предмета") | ftxui::color(ENEMY_COLOR)
+			}));
+		}
+		else {
+			logs.push_back(ftxui::hflow({
+				ftxui::text("Вы выбросили ") | ftxui::color(DECORATE_COLOR), ftxui::text(obj["content"]["dropped"].get<std::string>()) | ftxui::color(ENEMY_COLOR)
+			}));
+		}
+	}
+	else if (obj["content"]["type"] == "") {
+
+	}
+	else if (obj["content"]["type"] == "") {
+
+	}
 }
