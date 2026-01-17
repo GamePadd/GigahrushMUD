@@ -85,9 +85,9 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 		//Базовая инфа
 
 		logs.push_back(ftxui::hflow({
-			ftxui::paragraph(obj["content"]["locationName"].get<std::string>()) | ftxui::color(DECORATE_COLOR), 
+			ftxui::paragraph(obj["content"]["locationName"].get<std::string>()) | ftxui::color(ITEM_COLOR), 
 			ftxui::text(": Этаж ") | ftxui::color(DECORATE_COLOR),
-			ftxui::paragraph(std::to_string(obj["content"]["coordinates"]["floor"].get<int>())) | ftxui::color(DECORATE_COLOR),
+			ftxui::paragraph(std::to_string(obj["content"]["coordinates"]["floor"].get<int>())) | ftxui::color(ITEM_COLOR),
 		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50)) ;
 
 		logs.push_back(ftxui::hflow({
@@ -107,7 +107,7 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 		logs.push_back(ftxui::text(""));
 
 		logs.push_back(ftxui::hflow({
-			ftxui::paragraph(obj["content"]["locationDescription"].get<std::string>()) | ftxui::color(DECORATE_COLOR)
+			ftxui::paragraph(obj["content"]["locationDescription"].get<std::string>()) | ftxui::color(ADD_COLOR1)
 		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 
 		//Предметы и враги

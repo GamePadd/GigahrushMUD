@@ -212,6 +212,13 @@ void MainThread() {
 	ftxui::Component mainInputHandler = ftxui::CatchEvent(commandInput, [&](ftxui::Event event) {
 		if (event == ftxui::Event::Return) {
 			if (userCommand == "") { return true; }
+
+			logs.push_back(ftxui::text(""));
+			logs.push_back(ftxui::text("---------------------"));
+			logs.push_back(ftxui::text(""));
+
+			logs.push_back(ftxui::text(userCommand) | ftxui::color(DECORATE_COLOR) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+
 			SendServ(userCommand);
 			lastCommand = userCommand;
 			userCommand = "";
