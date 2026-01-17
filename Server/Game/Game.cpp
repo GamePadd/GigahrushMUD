@@ -1690,18 +1690,30 @@ namespace Gigahrush {
 		nlohmann::json res;
 		res["type"] = "ANSWER";
 		res["content"]["type"] = "LookItem";
-		res["content"]["res"] = "У вас нет такого предмета или такого врага нет в комнате";
+		res["content"]["found"] = false;
+		res["content"]["object"] = nlohmann::json::object();
 
 		for (auto& it : ply->inventory) {
 			if (it->name == item) {
-				res["content"]["res"] = it->getDescription();
+				res["content"]["found"] = true;
+				res["content"]["object"] = nlohmann::json::parse(it->getDescription());
 				break;
 			}
 		}
 
 		for (auto& it : ply->location->enemies) {
 			if (it->name == item) {
-				res["content"]["res"] = it->name + ": " + it->description + "\nЗдоровье: " + std::to_string(it->health) + "\nУрон: " + std::to_string(it->attack);
+				res["content"]["found"] = true;
+
+				nlohmann::json enem;
+				enem["type"] = "Enemy";
+				enem["name"] = it->name;
+				enem["description"] = it->description;
+				enem["health"] = it->health;
+				enem["damage"] = it->attack;
+
+				res["content"]["object"] = enem;
+
 				break;
 			}
 		}

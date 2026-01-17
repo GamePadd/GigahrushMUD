@@ -76,27 +76,64 @@ namespace Gigahrush {
 	//Descs
 
 	std::string Component::getDescription() const {
+		/*
 		std::string res = "";
 		res += "Предмет: " + name + "\nОписание: " + description + "\nНельзя использовать";
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "Item";
+		res["ItemType"] = "Component";
+		res["name"] = name;
+		res["description"] = description;
+		
+		return res.dump();
 	}
 
 	std::string Weapon::getDescription() const {
+		/*
 		std::string res = "";
 		res += "Предмет: " + name + "\nОписание: " + description + "\nУрон: " + std::to_string(damage) + "\nВы можете атаковать этим предметом";
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "Item";
+		res["ItemType"] = "Weapon";
+		res["name"] = name;
+		res["description"] = description;
+		res["damage"] = damage;
+
+		return res.dump();
 	}
 
 	std::string Armor::getDescription() const {
-		std::string res = "";
+		/*std::string res = "";
 		res += "Предмет: " + name + "\nОписание: " + description + "\nВосстановление брони: " + std::to_string(armor) + "\nМожно использовать";
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "Item";
+		res["ItemType"] = "Armor";
+		res["name"] = name;
+		res["description"] = description;
+		res["armor"] = armor;
+
+		return res.dump();
 	}
 
 	std::string HealingItem::getDescription() const {
-		std::string res = "";
+		/*std::string res = "";
 		res += "Предмет: " + name + "\nОписание: " + description + "\nВосстановление здоровья: " + std::to_string(heal) + "\nМожно использовать";
-		return res;
+		return res;*/
+
+		nlohmann::json res;
+		res["type"] = "Item";
+		res["ItemType"] = "Heal";
+		res["name"] = name;
+		res["description"] = description;
+		res["heal"] = heal;
+
+		return res.dump();
 	}
 
 	Enemy::Enemy(int _ID, std::string _name, std::string _description, std::vector<std::string> _replics, short int _health, short int _attack, std::vector<std::unique_ptr<Item>>&& _loot, short int _exp) :
@@ -183,7 +220,7 @@ namespace Gigahrush {
 		ply->stats.weaponEqID = ID;
 		ply->stats.wepEq = true;
 
-		res = "Вы экипировали " + name;
+		res = name;
 		return res;
 	}
 }

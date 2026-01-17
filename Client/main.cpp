@@ -115,30 +115,32 @@ void UpdateMsgThread() {
 	while (bgRunning) {
 		asio::error_code ec;
 		client.recv_buffer_server.resize(2048);
-		size_t br = client.socket.read_some(asio::buffer(client.recv_buffer_server), ec);
+		if (client.socket.is_open()) {
+			size_t br = client.socket.read_some(asio::buffer(client.recv_buffer_server), ec);
 
-		if (ec) { continue; }
+			if (ec) { continue; }
 
-		client.recv_buffer_server.resize(br);
+			client.recv_buffer_server.resize(br);
 
-		try {
-			nlohmann::json js = nlohmann::json::parse(client.recv_buffer_server);
+			try {
+				nlohmann::json js = nlohmann::json::parse(client.recv_buffer_server);
 
-			if (js["type"] == "ANSWER") {
-				addLog(logs, js);
+				if (js["type"] == "ANSWER") {
+					addLog(logs, js);
+				}
+				else if (js["type"] == "MAP") {
+					map = js["content"];
+				}
+				else if (js["type"] == "SERVER") {
+					serverMessages.push_back(js["content"]);
+				}
 			}
-			else if (js["type"] == "MAP") {
-				map = js["content"];
+			catch (std::exception& er) {
+				logs.push_back(ftxui::text(er.what()));
 			}
-			else if (js["type"] == "SERVER") {
-				serverMessages.push_back(js["content"]);
-			}
+
+			screen.PostEvent(ftxui::Event::Special("refresh"));
 		}
-		catch (std::exception& er) {
-			logs.push_back(ftxui::text(er.what()));
-		}
-
-		screen.PostEvent(ftxui::Event::Special("refresh"));
 	}
 	return;
 }
