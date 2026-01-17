@@ -4,7 +4,7 @@ void addEnemyAttack(std::vector<ftxui::Element>& logs, const nlohmann::json& ene
 	logs.push_back(ftxui::hflow({
 		ftxui::text(enemyStep["enemyName"].get<std::string>()) | ftxui::color(ENEMY_COLOR),
 		ftxui::text(" сказал: ") | ftxui::color(DECORATE_COLOR),
-		ftxui::text(enemyStep["replic"].get<std::string>()) | ftxui::color(ENEMY_COLOR)
+		ftxui::paragraph(enemyStep["replic"].get<std::string>()) | ftxui::color(ENEMY_COLOR)
 	}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 
 	if (enemyStep["hasArmor"].get<bool>() == true) {
@@ -333,7 +333,7 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 
 					logs.push_back(ftxui::hflow({
 						ftxui::text("Описание: ") | ftxui::color(DECORATE_COLOR),
-						ftxui::text(obbj["description"].get<std::string>()) | ftxui::color(ADD_COLOR1)
+						ftxui::paragraph(obbj["description"].get<std::string>()) | ftxui::color(ADD_COLOR1)
 					}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 
 					if (obbj["ItemType"] == "Component") {
@@ -388,7 +388,7 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 
 					logs.push_back(ftxui::hflow({
 						ftxui::text("Описание: ") | ftxui::color(DECORATE_COLOR),
-						ftxui::text(obbj["description"].get<std::string>()) | ftxui::color(ADD_COLOR1)
+						ftxui::paragraph(obbj["description"].get<std::string>()) | ftxui::color(ADD_COLOR1)
 					}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 
 					logs.push_back(ftxui::hflow({
@@ -417,12 +417,12 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 			if (!itmm.empty()) {
 				if (itmm["type"] == "Component") {
 					logs.push_back(ftxui::hflow({
-						ftxui::text("Вы не можете использовать компонент!") | ftxui::color(ENEMY_COLOR)
+						ftxui::paragraph("Вы не можете использовать компонент!") | ftxui::color(ENEMY_COLOR)
 					}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 				}
 				if (itmm["type"] == "Weapon") {
 					logs.push_back(ftxui::hflow({
-						ftxui::text("Вы не можете использовать оружие, вы можете его только экипировать!") | ftxui::color(ENEMY_COLOR)
+						ftxui::paragraph("Вы не можете использовать оружие, вы можете его только экипировать!") | ftxui::color(ENEMY_COLOR)
 					}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 				}
 				if (itmm["type"] == "Armor") {
@@ -432,7 +432,7 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 							ftxui::text(itmm["name"].get<std::string>()) | ftxui::color(DECORATE_COLOR)
 						}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 						logs.push_back(ftxui::hflow({
-							ftxui::text(itmm["description"].get<std::string>()) | ftxui::color(ADD_COLOR1)
+							ftxui::paragraph(itmm["description"].get<std::string>()) | ftxui::color(ADD_COLOR1)
 						}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 						logs.push_back(ftxui::hflow({
 							ftxui::text("Вам добавлено ") | ftxui::color(DECORATE_COLOR),
@@ -453,7 +453,7 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 							ftxui::text(itmm["name"].get<std::string>()) | ftxui::color(DECORATE_COLOR)
 							}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 						logs.push_back(ftxui::hflow({
-							ftxui::text(itmm["description"].get<std::string>()) | ftxui::color(ADD_COLOR1)
+							ftxui::paragraph(itmm["description"].get<std::string>()) | ftxui::color(ADD_COLOR1)
 							}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 						logs.push_back(ftxui::hflow({
 							ftxui::text("Вам добавлено ") | ftxui::color(DECORATE_COLOR),
