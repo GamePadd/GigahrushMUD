@@ -826,4 +826,22 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 		return;
 	}
+	else if (obj["content"]["type"] == "Help") {
+		try {
+			std::vector<nlohmann::json> helpList = obj["content"]["help"].get<std::vector<nlohmann::json>>();
+
+			for (auto it : helpList) {
+				logs.push_back(ftxui::hflow({
+					ftxui::paragraph(it["name"].get<std::string>()) | ftxui::color(ITEM_COLOR),
+					ftxui::text(" - ") | ftxui::color(DECORATE_COLOR),
+					ftxui::paragraph(it["description"].get<std::string>()) | ftxui::color(DECORATE_COLOR)
+				}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+			}
+		}
+		catch (const std::exception& ec) {
+			logs.push_back(ftxui::hflow({
+				ftxui::text(ec.what()) | ftxui::color(ENEMY_COLOR),
+			}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+		}
+	}
 }

@@ -105,6 +105,7 @@ namespace Gigahrush {
 			std::string Equip(std::shared_ptr<Player>, std::string); // JSON Done
 			std::string RepairExit(std::shared_ptr<Player>); // JSON Done
 			std::string CurrentPlayers(std::shared_ptr<Player>); // JSON Done
+			std::string GetHelp(std::shared_ptr<Player>);
 
 			//EndCommands
 

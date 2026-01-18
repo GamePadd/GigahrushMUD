@@ -2450,6 +2450,81 @@ namespace Gigahrush {
 		return res.dump(); 
 	}
 
+	std::string Game::GetHelp(std::shared_ptr<Player> ply) {
+		nlohmann::json res;
+
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "Help";
+		res["content"]["help"] = nlohmann::json::array();
+
+		res["content"]["help"].push_back({
+			{"name", "я"},
+			{"description", "Показывает вашу текующую статистику"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "осмотреться"},
+			{"description", "Показывает информацию о локации в которой вы находитесь, описание, предметы, враги и т.д."}
+		});
+		res["content"]["help"].push_back({
+			{"name", "север/юг/запад/восток"},
+			{"description", "4 команды которые используются для передвижения по карте, для передвижения нужно просто написать нужную сторону"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "создать [предмет]"},
+			{"description", "Крафтит выбранный предмет из вещей которые есть у вас в инвентаре"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "выбросить [предмет]"},
+			{"description", "Выбрасывает выбранный предмет из инвентаря в комнату"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "поднять [предмет]"},
+			{"description", "Поднимает предмет на локации, вы не можете подбирать предметы если на локации есть враги"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "инвентарь"},
+			{"description", "Ваши текущие предметы"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "вверх/вниз"},
+			{"description", "2 команды которые используются для смены этажа, могут использоваться только в комнатах которые обозначены как выход"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "осмотреть [предмет/враг]"},
+			{"description", "Выводит описание предмета из вашего инвентаря или врага на локации с его характеристиками"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "рецепты"},
+			{"description", "Показывает доступные рецепты для создания"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "использовать [предмет]"},
+			{"description", "Использует предмет"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "атаковать"},
+			{"description", "Атакует врага, можно использовать только в битве и если у вас экипировано оружие"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "битва"},
+			{"description", "Используется чтобы вступить в битву с врагом"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "экипировать"},
+			{"description", "Используется чтобы экипировать оружие и впоследствии атаковать им во время битвы"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "починить"},
+			{"description", "Используется для починки выхода если тот сломан"}
+		});
+		res["content"]["help"].push_back({
+			{"name", "игроки"},
+			{"description", "Возвращает текущих игроков в одной комнате с вами"}
+		});
+
+		return res.dump();
+	}
+
 	void Game::LoadConfig() {
 		configurator.LoadConfig();
 		//add commands
@@ -2480,6 +2555,7 @@ namespace Gigahrush {
 		commandhandler.add("рецепты", [this](std::shared_ptr<Player> ply) {return this->EnableCrafts(ply); }, 0, false);
 		commandhandler.add("использовать", [this](std::shared_ptr<Player> ply, std::string arg) {return this->UseItem(ply, arg); }, 1, true);
 		commandhandler.add("починить", [this](std::shared_ptr<Player> ply, std::string arg) {return this->RepairExit(ply); }, 0, false);
+		commandhandler.add("помощь", [this](std::shared_ptr<Player> ply) { return this->GetHelp(ply);},0,true);
 
 		commandhandler.add("атаковать", [this](std::shared_ptr<Player> ply) {return this->Attack(ply); }, 0, true);
 		commandhandler.add("битва", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Battle(ply, arg); }, 1, false);

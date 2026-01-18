@@ -11,6 +11,7 @@
 #include "ftxui/screen/screen.hpp"
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/screen_interactive.hpp"
+#include "ftxui/component/component_options.hpp"
 
 #include "nlohmann/json.hpp"
 
@@ -62,6 +63,7 @@ std::mutex mtx;
 State state = State::DISCONNECTED;
 
 std::vector<ftxui::Element> logs;
+
 std::vector<std::string> serverMessages;
 std::string map;
 
@@ -114,7 +116,7 @@ void SendServ(std::string request) {
 void UpdateMsgThread() {
 	while (bgRunning) {
 		asio::error_code ec;
-		client.recv_buffer_server.resize(2048);
+		client.recv_buffer_server.resize(4096);
 		if (client.socket.is_open()) {
 			size_t br = client.socket.read_some(asio::buffer(client.recv_buffer_server), ec);
 
@@ -124,7 +126,6 @@ void UpdateMsgThread() {
 
 			try {
 				nlohmann::json js = nlohmann::json::parse(client.recv_buffer_server);
-
 				if (js["type"] == "ANSWER") {
 					addLog(logs, js);
 				}
