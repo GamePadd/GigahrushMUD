@@ -3,8 +3,10 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <fstream>
 
 namespace Gigahrush {
+
 	enum Status { InBattle, NotInBattle };
 	//enum Type { Component, Weapon, Food, Healing };
 
@@ -211,6 +213,30 @@ namespace Gigahrush {
 
 		//Skill stats
 		int weaponSkill;
+
+		void save(std::ofstream& outfile) {
+			outfile.write(reinterpret_cast<const char*>(&health),sizeof(health));
+			outfile.write(reinterpret_cast<const char*>(&armor), sizeof(armor));
+			outfile.write(reinterpret_cast<const char*>(&level), sizeof(level));
+			outfile.write(reinterpret_cast<const char*>(&expTolevelUp), sizeof(expTolevelUp));
+			outfile.write(reinterpret_cast<const char*>(&currentExp), sizeof(currentExp));
+			outfile.write(reinterpret_cast<const char*>(&inventoryMaxSize), sizeof(inventoryMaxSize));
+			outfile.write(reinterpret_cast<const char*>(&wepEq), sizeof(wepEq));
+			outfile.write(reinterpret_cast<const char*>(&weaponEqID), sizeof(weaponEqID));
+			outfile.write(reinterpret_cast<const char*>(&weaponSkill), sizeof(weaponSkill));
+		}
+
+		void load(std::ifstream& infile) {
+			infile.read(reinterpret_cast<char*>(&health), sizeof(health));
+			infile.read(reinterpret_cast<char*>(&armor), sizeof(armor));
+			infile.read(reinterpret_cast<char*>(&level), sizeof(level));
+			infile.read(reinterpret_cast<char*>(&expTolevelUp), sizeof(expTolevelUp));
+			infile.read(reinterpret_cast<char*>(&currentExp), sizeof(currentExp));
+			infile.read(reinterpret_cast<char*>(&inventoryMaxSize), sizeof(inventoryMaxSize));
+			infile.read(reinterpret_cast<char*>(&wepEq), sizeof(wepEq));
+			infile.read(reinterpret_cast<char*>(&weaponEqID), sizeof(weaponEqID));
+			infile.read(reinterpret_cast<char*>(&weaponSkill), sizeof(weaponSkill));
+		}
 	};
 
 	struct Battle {
@@ -226,6 +252,25 @@ namespace Gigahrush {
 		Battle battleStatus;
 		PlayerStats stats;
 		std::atomic<bool> isInSession;
+
+		void save(std::ofstream& outfile) {
+			uint32_t username_size = static_cast<uint32_t>(username.size());
+			outfile.write(reinterpret_cast<const char*>(&username_size), sizeof(username_size));
+			outfile.write(reinterpret_cast<const char*>(username.data()), username_size);
+
+			stats.save(outfile);
+
+			//Save inventory
+			uint32_t inv_size = static_cast<uint32_t>(inventory.size());
+			outfile.write(reinterpret_cast<const char*>(&inv_size), sizeof(inv_size));
+
+			for (auto& it : inventory) {
+				uint32_t itID = static_cast<uint32_t>(it->ID);
+				outfile.write(reinterpret_cast<const char*>(&itID), sizeof(itID));
+			}
+		}
+
+		void load(std::ifstream& infile);
 	};
 
 	struct RoomDescElement {

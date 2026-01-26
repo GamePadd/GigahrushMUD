@@ -11,6 +11,7 @@ std::mutex gameMutex;
 std::atomic<bool> serverRunning = false;
 std::atomic<bool> isExit = false;
 std::atomic<bool> serverActive = false;
+Server* srvv = nullptr;
 
 std::string toLowerCase(std::string str) {
 	std::string res = "";
@@ -23,9 +24,9 @@ std::string toLowerCase(std::string str) {
 void StartServer() {
 	asio::io_context io_context;
 	Server srv(io_context, 15001);
+	srvv = &srv;
 
 	srv.startMapUpdate();
-
 
 	while (!isExit) {
 		while (!serverRunning) {
@@ -86,6 +87,7 @@ void Terminal() {
 			gameMutex.lock();
 			if (Game.isGenerated) {
 				serverRunning = true;
+				Game.isReseted = false;
 			}
 			else {
 				std::cout << "Can't start server. Game is not generated or loaded.\n";
@@ -97,13 +99,23 @@ void Terminal() {
 			serverRunning = false;
 		}
 		else if (lowCom == "reset") {
-			std::cout << "Stopping server...\n";
-			serverRunning = false;
+			if (srvv != nullptr) {
+				std::cout << "Stopping server...\n";
+				serverRunning = false;
 
-			std::cout << "Reseting game...\n";
+				std::cout << "Reseting game...\n";
+				Game.isReseted = true;
+				gameMutex.lock();
+				Game.ResetGame();
+				for (auto& it : srvv->allSessions) {
+					auto p = it.lock();
+					if (p != nullptr) {
+						p->sessionPlayer.reset();
+						std::cout << "Player reseted\n";
+					}
+				}
+			}
 
-			gameMutex.lock();
-			Game.ResetGame();
 			gameMutex.unlock();
 		}
 		else if (lowCom == "info") {
@@ -121,6 +133,34 @@ void Terminal() {
 			}
 
 			break;
+		}
+		else if (lowCom == "") {
+			std::cout << "No command!\n";
+		}
+		else {
+			std::stringstream ss(lowCom);
+			std::vector<std::string> words;
+			std::string word;
+			while (ss >> word) {
+				words.push_back(word);
+			}
+
+			if (words[0] == "save") {
+				if (words.size() >= 2) {
+					Game.SaveGame(words[1]);
+				}
+				else {
+					std::cout << "Bad syntax!\n";
+				}
+			}
+			else if (words[0] == "load") {
+				if (words.size() >= 2) {
+					Game.LoadGame(words[1]);
+				}
+				else {
+					std::cout << "Bad syntax!\n";
+				}
+			}
 		}
 	}
 }

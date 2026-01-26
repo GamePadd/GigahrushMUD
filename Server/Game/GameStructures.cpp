@@ -1,6 +1,7 @@
 ﻿#include "GameStructures.h"
 #include <algorithm>
 #include "nlohmann/json.hpp"
+#include "Game.h"
 
 namespace Gigahrush {
 	Item::Item(int _ID, const std::string& _name, const std::string& _description, const std::string& _useDescription, bool _canSpawn) :
@@ -222,5 +223,27 @@ namespace Gigahrush {
 
 		res = name;
 		return res;
+	}
+
+	void Player::load(std::ifstream& infile) {
+		uint32_t username_size;
+		infile.read(reinterpret_cast<char*>(&username_size), sizeof(username_size));
+		username.resize(username_size);
+		infile.read(reinterpret_cast<char*>(username.data()), username_size);
+
+		stats.load(infile);
+
+		uint32_t inv_size;
+		infile.read(reinterpret_cast<char*>(&inv_size), sizeof(inv_size));
+
+		for (int i = 0; i < inv_size; i++) {
+			uint32_t itemID;
+			infile.read(reinterpret_cast<char*>(&itemID), sizeof(itemID));
+			for (auto& it : Game::Instance().configurator.config.items) {
+				if (itemID == it->ID) {
+					inventory.push_back(it->clone());
+				}
+			}
+		}
 	}
 }

@@ -13,7 +13,7 @@ class Session : public std::enable_shared_from_this<Session> {
 
 	public:
 		asio::ip::tcp::socket socket;
-		std::shared_ptr<Gigahrush::Player> sessionPlayer;
+		std::weak_ptr<Gigahrush::Player> sessionPlayer;
 
 		Session(asio::ip::tcp::socket&& socket);
 		~Session();

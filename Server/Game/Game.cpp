@@ -888,6 +888,13 @@ namespace Gigahrush {
 			std::cout << "Items count: " << items << "\n";
 			std::cout << "Enemies count: " << enemies << "\n";
 			std::cout << "Players on server: " << gamedata.players.size() << "\n";
+
+			std::cout << "=== Players on server ===\n";
+			size_t c = 1;
+			for (auto& it : gamedata.players) {
+				std::cout << std::to_string(c) + ". " + it->username << "\n";
+				++c;
+			}
 		}
 		else {
 			std::cout << "No info. Game is not generated or loaded\n";
@@ -2588,5 +2595,60 @@ namespace Gigahrush {
 		std::string res = "";
 		res = commandhandler.handle(ply, command, inb);
 		return res;
+	}
+
+	void Game::SaveGame(std::string filename) {
+		//Players save
+
+		std::ofstream outFile(filename + "_players.GSAVE", std::ios::binary);
+		uint32_t playerscount = static_cast<uint32_t>(gamedata.players.size());
+		outFile.write(reinterpret_cast<const char*>(&playerscount),sizeof(playerscount));
+
+		for (auto& it : gamedata.players) {
+			it->save(outFile);
+		}
+
+		//EOF Players save
+		std::cout << "Save " << filename << "\n";
+
+		outFile.close();
+	}
+
+	void Game::LoadGame(std::string filename) {
+		/*if (isGenerated == true) {
+			std::cout << "Cant load game while started!\n";
+			return;
+		}*/
+		if (isReseted == false) {
+			std::cout << "You need reset game before loading!\n";
+			return;
+		}
+		//Player load
+		gamedata.players = std::vector<std::shared_ptr<Player>>(); //Обнуляю текущих игроков
+
+		try {
+			std::ifstream inFile(filename + "_players.GSAVE", std::ios::binary);
+
+			if (!inFile.is_open()) {
+				std::cout << "File load error!";
+				return;
+			}
+
+			uint32_t plyCount;
+			inFile.read(reinterpret_cast<char*>(&plyCount), sizeof(plyCount));
+
+			for (int i = 0; i < plyCount; i++) {
+				std::string baseName = "player";
+				std::weak_ptr<Player> ply = SpawnPlayer(baseName);
+				ply.lock()->load(inFile);
+			}
+
+			std::cout << "Load " << filename << "\n";
+
+			inFile.close();
+		}
+		catch (const std::exception& e) {
+			std::cout << "Error!";
+		}
 	}
 }

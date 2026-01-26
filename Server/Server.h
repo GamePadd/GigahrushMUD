@@ -9,11 +9,10 @@ class Server {
 		asio::ip::tcp::acceptor acceptor;
 		std::optional<asio::ip::tcp::socket> socket;
 
-		std::vector<std::weak_ptr<Session>> allSessions;
-
 		asio::steady_timer timer1;
 
 	public:
+		std::vector<std::weak_ptr<Session>> allSessions;
 		Server(asio::io_context& io_context, std::uint16_t port);
 
 		//Timers

@@ -11,7 +11,6 @@
 #include "CommandHandler.h"
 
 namespace Gigahrush {
-
 	struct Config {
 		MapSize mapSize;
 
@@ -72,7 +71,9 @@ namespace Gigahrush {
 		public:
 			Configurator configurator;
 			GameData gamedata;
+
 			bool isGenerated;
+			bool isReseted;
 
 			static Game& Instance();
 
@@ -83,6 +84,9 @@ namespace Gigahrush {
 			void Info();
 
 			std::string CheckPlayerDeath(std::shared_ptr<Player>); // JSON Done
+
+			void SaveGame(std::string);
+			void LoadGame(std::string);
 
 			//Commands
 

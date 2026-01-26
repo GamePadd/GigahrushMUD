@@ -22,7 +22,9 @@ void Server::mapUpdate(const asio::error_code& ec) {
 	for (auto& it : allSessions) {
 		try {
 			if (auto p = it.lock()) {
-				asio::write(p->socket, asio::buffer(Gigahrush::Game::Instance().Map(p->sessionPlayer)));
+				if (p->sessionPlayer.lock() != nullptr) {
+					asio::write(p->socket, asio::buffer(Gigahrush::Game::Instance().Map(p->sessionPlayer.lock())));
+				}
 			}
 		}
 		catch (const std::exception& ec) {
