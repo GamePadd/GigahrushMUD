@@ -96,15 +96,36 @@ void Server::disconnectPlayerNotify(std::string username) {
 }
 
 void Server::waitSamosbor() {
+	if (Gigahrush::Game::Instance().isGenerated == false) {
+		std::cout << "Cant start samosbor, game is not generated\n";
+		return; 
+	}
 
+	std::cout << "Start wait samosbor\n";
+	int waitTime = Gigahrush::Game::Instance().configurator.config.samosborconfig.minInterval + rand() % (Gigahrush::Game::Instance().configurator.config.samosborconfig.maxInterval - Gigahrush::Game::Instance().configurator.config.samosborconfig.minInterval + 1);
+	samosborIntervalTimer.expires_after(asio::chrono::seconds(waitTime));
+	samosborIntervalTimer.async_wait([this](const asio::error_code& ec){
+		startSamosbor();
+	});
 }
 
 void Server::startSamosbor() {
-
+	Gigahrush::Game::Instance().samosborGoing = true;
+	std::cout << "Samosbor started\n";
+	int waitTime = Gigahrush::Game::Instance().configurator.config.samosborconfig.minDuration + rand() % (Gigahrush::Game::Instance().configurator.config.samosborconfig.maxDuration - Gigahrush::Game::Instance().configurator.config.samosborconfig.minDuration + 1);
+	samosborDuringTimer.expires_after(asio::chrono::seconds(waitTime));
+	samosborDuringTimer.async_wait([this](const asio::error_code& ec) {
+		stopSamosbor(false);
+	});
 }
 
-void Server::stopSamosbor() {
+void Server::stopSamosbor(bool force) {
+	Gigahrush::Game::Instance().samosborGoing = false;
+	std::cout << "Samosbor stopped\n";
 
+	if (!force) {
+		waitSamosbor();
+	}
 }
 
 void Server::checkPlayersSamosbor() {

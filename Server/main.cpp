@@ -27,6 +27,8 @@ void StartServer() {
 	srvv = &srv;
 
 	srv.startMapUpdate();
+	
+	Gigahrush::Game::Instance().srv = &srv;
 
 	while (!isExit) {
 		while (!serverRunning) {
@@ -43,18 +45,22 @@ void StartServer() {
 		if (serverActive == true) {
 			io_context.stop();
 			std::cout << "Server stopped\n";
+			srv.stopSamosbor(true);
 		}
 		else {
 			std::cout << "Server not started xd\n";
+			srv.stopSamosbor(true);
 		}
 	}
 
 	if (serverActive == true) {
 		io_context.stop();
 		std::cout << "Server stopped\n";
+		srv.stopSamosbor(true);
 	}
 	else {
 		std::cout << "Server not started xd\n";
+		srv.stopSamosbor(true);
 	}
 }
 

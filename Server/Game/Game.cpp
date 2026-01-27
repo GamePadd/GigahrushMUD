@@ -1,5 +1,6 @@
 ﻿#include "Game.h"
 #include "../utils.h"
+#include "../Server.h"
 
 namespace Gigahrush {
 	std::string toLowerCase(std::string str) {
@@ -350,7 +351,7 @@ namespace Gigahrush {
 		return g;
 	}
 
-	Game::Game(): isGenerated(false), isReseted(true), samosborGoing(false) {}
+	Game::Game(): isGenerated(false), isReseted(true), samosborGoing(false), srv(nullptr) {}
 	Game::~Game() = default;
 
 	bool Game::changeDir(std::vector<std::vector<int>>& mask, int& X, int& Y, int& randDir) {
@@ -902,6 +903,7 @@ namespace Gigahrush {
 			std::cout << "Game generated in " << duration << ", server now can be started!\n";
 			isReseted = false;
 			isGenerated = true;
+			srv->waitSamosbor();
 			return true;
 		}
 		else {

@@ -24,7 +24,7 @@ class Server {
 		void mapUpdate(const asio::error_code&);
 		void waitSamosbor();
 		void startSamosbor();
-		void stopSamosbor();
+		void stopSamosbor(bool);
 
 		void checkPlayersSamosbor();
 

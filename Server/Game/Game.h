@@ -10,7 +10,10 @@
 #include <algorithm>
 #include "CommandHandler.h"
 
+class Server;
+
 namespace Gigahrush {
+
 	struct Config {
 		MapSize mapSize;
 
@@ -73,6 +76,7 @@ namespace Gigahrush {
 		public:
 			Configurator configurator;
 			GameData gamedata;
+			Server* srv;
 
 			bool isGenerated;
 			bool isReseted;
