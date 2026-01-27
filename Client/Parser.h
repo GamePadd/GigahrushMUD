@@ -883,7 +883,11 @@ void addServerMsg(std::vector<ftxui::Element>& serverMessages, const nlohmann::j
 			ftxui::text(" подключился! ") | ftxui::color(DECORATE_COLOR)
 		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 	}
-	else if (obj["content"]["type"] == "") {
-
+	else if (obj["content"]["type"] == "PlayerDisconnect") {
+		serverMessages.push_back(ftxui::hflow({
+			ftxui::text("Игрок ") | ftxui::color(DECORATE_COLOR),
+			ftxui::text(obj["content"]["name"].get<std::string>()) | ftxui::color(ENEMY_COLOR),
+			ftxui::text(" отключился! ") | ftxui::color(DECORATE_COLOR)
+		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 	}
 }

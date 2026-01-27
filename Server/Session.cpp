@@ -13,10 +13,16 @@ Session::Session(asio::ip::tcp::socket&& socket, Server* _srv) :
 Session::~Session() {
 	if (sessionPlayer.lock() != nullptr) {
 		std::cout << "User " << sessionPlayer.lock()->username << " disconnected!" << std::endl;
+		if (srv != nullptr) {
+			srv->disconnectPlayerNotify(sessionPlayer.lock()->username);
+		}
 		sessionPlayer.lock()->isInSession = false;
 	}
 	else {
 		std::cout << "Unknown user disconnected!" << std::endl;
+		if (srv != nullptr) {
+			srv->disconnectPlayerNotify("unknown");
+		}
 	}
 }
 

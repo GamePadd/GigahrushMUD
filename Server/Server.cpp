@@ -22,6 +22,7 @@ void Server::async_accept() {
 }
 
 void Server::mapUpdate(const asio::error_code& ec) {
+	newPlayerNotify("test");
 	for (auto& it : allSessions) {
 		try {
 			if (auto p = it.lock()) {
@@ -53,6 +54,29 @@ void Server::newPlayerNotify(std::string username) {
 	nlohmann::json newply;
 	newply["type"] = "SERVER";
 	newply["content"]["type"] = "NewPlayer";
+	newply["content"]["name"] = username;
+	//std::cout << "notify start";
+	for (auto& it : allSessions) {
+		try {
+			if (auto p = it.lock()) {
+				if (p != nullptr) {
+					if (p->socket.is_open()) {
+						asio::write(p->socket, asio::buffer(newply.dump()));
+					}
+					//std::cout << "player notified";
+				}
+			}
+		}
+		catch (const std::exception& ec) {
+			std::cout << ec.what() << std::endl;
+		}
+	}
+}
+
+void Server::disconnectPlayerNotify(std::string username) {
+	nlohmann::json newply;
+	newply["type"] = "SERVER";
+	newply["content"]["type"] = "PlayerDisconnect";
 	newply["content"]["name"] = username;
 	//std::cout << "notify start";
 	for (auto& it : allSessions) {
