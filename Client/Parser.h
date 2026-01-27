@@ -207,7 +207,7 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 			logs.push_back(ftxui::text(""));
 
 			logs.push_back(ftxui::hflow({
-				ftxui::paragraph("На локации сломан лифт, вы не можете перейти на другой этаж пока не почините лифт") | ftxui::color(ENEMY_COLOR)
+				ftxui::paragraph("На локации сломан выход, вы не можете перейти на другой этаж пока не почините его") | ftxui::color(ENEMY_COLOR)
 			}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 		}
 
@@ -543,7 +543,7 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 	else if (obj["content"]["type"] == "ChangeFloor") {
 		if (obj["content"]["isPlayerBrokeElevator"].get<bool>() == true) {
 			logs.push_back(ftxui::hflow({
-				ftxui::paragraph("Вы сломали лифт, вы не сможете сменить этаж пока не почините его") | ftxui::color(ENEMY_COLOR)
+				ftxui::paragraph("Вы сломали выход, вы не сможете сменить этаж пока не почините его") | ftxui::color(ENEMY_COLOR)
 			}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 			return;
 		}

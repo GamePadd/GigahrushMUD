@@ -733,7 +733,7 @@ namespace Gigahrush {
 
 								randRoom->itemDescription.push_back(RoomDescElement(item->ID, phrase));
 								randRoom->items.push_back(item->clone());
-								std::cout << "Add repair " << item->name << " on floor " << std::to_string(flr->level) << " [" << std::to_string(randRoom->location.X) << ", " << std::to_string(randRoom->location.Y) << "]\n";
+								//std::cout << "Add repair " << item->name << " on floor " << std::to_string(flr->level) << " [" << std::to_string(randRoom->location.X) << ", " << std::to_string(randRoom->location.Y) << "]\n";
 							}
 						}
 					}
@@ -1083,7 +1083,8 @@ namespace Gigahrush {
 				}
 			}
 			else {
-				res += "\n\nНа локации сломан лифт, вы не можете перейти на другой этаж пока не почините лифт";
+				res += "\n\nНа локации сломан 
+				, вы не можете перейти на другой этаж пока не почините лифт";
 			}
 		}
 		*/
