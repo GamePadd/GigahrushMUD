@@ -6,6 +6,8 @@
 #include <memory>
 #include <chrono>
 
+class Server;
+
 class Session : public std::enable_shared_from_this<Session> {
 	private:
 		std::string buffer;
@@ -14,8 +16,9 @@ class Session : public std::enable_shared_from_this<Session> {
 	public:
 		asio::ip::tcp::socket socket;
 		std::weak_ptr<Gigahrush::Player> sessionPlayer;
+		Server* srv;
 
-		Session(asio::ip::tcp::socket&& socket);
+		Session(asio::ip::tcp::socket&& socket, Server*);
 		~Session();
 
 		void start();

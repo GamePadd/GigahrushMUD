@@ -33,6 +33,8 @@ namespace Gigahrush {
 		std::size_t maxInventorySize;
 		std::size_t maxRoomItems;
 
+		SamosborEvent samosborconfig;
+
 		bool configLoaded = false;
 	};
 
@@ -74,6 +76,8 @@ namespace Gigahrush {
 
 			bool isGenerated;
 			bool isReseted;
+
+			bool samosborGoing;
 
 			static Game& Instance();
 

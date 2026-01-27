@@ -3,6 +3,7 @@
 //Cfg
 
 constexpr unsigned short int MAX_LOGS = 55;
+constexpr unsigned short int MAX_SERVER_MSGS = 15;
 
 //Main Window
 

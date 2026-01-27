@@ -1,9 +1,11 @@
 ﻿#include "Session.h"
 #include <nlohmann/json.hpp>
+#include "Server.h"
 
-Session::Session(asio::ip::tcp::socket&& socket) : 
+Session::Session(asio::ip::tcp::socket&& socket, Server* _srv) : 
 	socket(std::move(socket)), 
-	game(Gigahrush::Game::Instance()) {
+	game(Gigahrush::Game::Instance()),
+	srv(_srv){
 	sessionPlayer.reset();
 	buffer.resize(256);
 }
@@ -74,6 +76,9 @@ void Session::firstTime() {
 						self->sessionPlayer = it;
 						self->sessionPlayer.lock()->isInSession = true;
 						std::cout << "User already in gamedata. User has joined the game with nick: " << self->sessionPlayer.lock()->username << "\n";
+						if (self->srv != nullptr) {
+							self->srv->newPlayerNotify(nickname);
+						}
 					}
 				}
 			}
@@ -81,6 +86,10 @@ void Session::firstTime() {
 				self->sessionPlayer = Gigahrush::Game::Instance().SpawnPlayer(self->buffer);
 				self->sessionPlayer.lock()->isInSession = true;
 				std::cout << "User has joined the game with nick: " << self->sessionPlayer.lock()->username << "\n";
+				if (self->srv != nullptr) {
+					self->srv->newPlayerNotify(nickname);
+				}
+				
 			}
 
 			self->buffer.resize(256);

@@ -20,6 +20,12 @@ namespace Gigahrush {
 		config.maxInventorySize = SizeConfig["MaxInventory"];
 		config.maxRoomItems = SizeConfig["MaxRoomItems"];
 
+		config.samosborconfig.minInterval = SizeConfig["Samosbor"]["minInterval"];
+		config.samosborconfig.maxInterval = SizeConfig["Samosbor"]["maxInterval"];
+		config.samosborconfig.minDuration = SizeConfig["Samosbor"]["minDuration"];
+		config.samosborconfig.maxDuration = SizeConfig["Samosbor"]["maxDuration"];
+		config.samosborconfig.liveRoomsIDs = SizeConfig["Samosbor"]["liveRoomsIDs"].get<std::vector<int>>();
+
 		std::cout << "Main config loaded" << std::endl;
 	}
 
@@ -344,7 +350,7 @@ namespace Gigahrush {
 		return g;
 	}
 
-	Game::Game(): isGenerated(false), isReseted(true) {}
+	Game::Game(): isGenerated(false), isReseted(true), samosborGoing(false) {}
 	Game::~Game() = default;
 
 	bool Game::changeDir(std::vector<std::vector<int>>& mask, int& X, int& Y, int& randDir) {

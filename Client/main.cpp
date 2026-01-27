@@ -64,8 +64,8 @@ std::mutex mtx;
 State state = State::DISCONNECTED;
 
 std::vector<ftxui::Element> logs;
+std::vector<ftxui::Element> serverMessages;
 
-std::vector<std::string> serverMessages;
 std::string map;
 
 std::string ip;
@@ -134,7 +134,7 @@ void UpdateMsgThread() {
 					map = js["content"];
 				}
 				else if (js["type"] == "SERVER") {
-					serverMessages.push_back(js["content"]);
+					addServerMsg(serverMessages, js);
 				}
 			}
 			catch (std::exception& er) {
@@ -190,7 +190,7 @@ void MainThread() {
 		return ftxui::vbox(logs) | ftxui::focusPositionRelative(0.0f, 1.0f);
 	});
 
-	ftxui::Component serverWindow = ftxui::Renderer([&] {
+	/*ftxui::Component serverWindow = ftxui::Renderer([&] {
 		std::vector<ftxui::Element> elements;
 
 		for (const auto& log : serverMessages) {
@@ -201,7 +201,11 @@ void MainThread() {
 
 		return ftxui::vbox(elements) | ftxui::frame |
 			ftxui::vscroll_indicator | ftxui::focusPositionRelative(0.0f, 1.0f);
-		});
+	});*/
+
+	ftxui::Component serverWindow = ftxui::Renderer([&] {
+		return ftxui::vbox(serverMessages) | ftxui::focusPositionRelative(0.0f, 1.0f);
+	});
 
 	ftxui::Component mapWindow = ftxui::Renderer([&] {
 		std::vector<ftxui::Element> elements;

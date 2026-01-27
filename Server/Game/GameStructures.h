@@ -39,6 +39,16 @@ namespace Gigahrush {
 		std::vector<int> itemsID;
 	};
 
+	struct SamosborEvent {
+		int minInterval;
+		int maxInterval;
+
+		int minDuration;
+		int maxDuration;
+
+		std::vector<int> liveRoomsIDs;
+	};
+
 	// Game Structures
 
 	struct Player;
