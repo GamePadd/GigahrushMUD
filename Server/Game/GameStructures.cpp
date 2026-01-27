@@ -225,11 +225,36 @@ namespace Gigahrush {
 		return res;
 	}
 
+	void Player::save(std::ofstream& outfile) {
+		uint32_t username_size = static_cast<uint32_t>(username.size());
+		outfile.write(reinterpret_cast<const char*>(&username_size), sizeof(username_size));
+		outfile.write(reinterpret_cast<const char*>(username.data()), username_size);
+
+		location->location.save(outfile);
+
+		stats.save(outfile);
+
+		//Save inventory
+		uint32_t inv_size = static_cast<uint32_t>(inventory.size());
+		outfile.write(reinterpret_cast<const char*>(&inv_size), sizeof(inv_size));
+
+		for (auto& it : inventory) {
+			uint32_t itID = static_cast<uint32_t>(it->ID);
+			outfile.write(reinterpret_cast<const char*>(&itID), sizeof(itID));
+		}
+
+		battleStatus.save(outfile);
+	}
+
 	void Player::load(std::ifstream& infile) {
 		uint32_t username_size;
 		infile.read(reinterpret_cast<char*>(&username_size), sizeof(username_size));
 		username.resize(username_size);
 		infile.read(reinterpret_cast<char*>(username.data()), username_size);
+	
+		Location loc;
+		loc.load(infile);
+		Game::Instance().SetPlayerLocation(this, loc);
 
 		stats.load(infile);
 
@@ -242,6 +267,177 @@ namespace Gigahrush {
 			for (auto& it : Game::Instance().configurator.config.items) {
 				if (itemID == it->ID) {
 					inventory.push_back(it->clone());
+				}
+			}
+		}
+
+		uint8_t statuss;
+		infile.read(reinterpret_cast<char*>(&statuss), sizeof(statuss));
+		if (statuss == 1) {
+			battleStatus.status = InBattle;
+
+			uint32_t enID;
+			infile.read(reinterpret_cast<char*>(&enID), sizeof(enID));
+
+			Game::Instance().SetPlayerBattleEnemy(this, enID);
+		}
+		else {
+			battleStatus.status = NotInBattle;
+		}
+	}
+
+	void Room::load(std::ifstream& infile) {
+		uint32_t itemCount;
+		infile.read(reinterpret_cast<char*>(&itemCount), sizeof(itemCount));
+
+		for (int i = 0; i < itemCount; i++) {
+			uint32_t itemID;
+			infile.read(reinterpret_cast<char*>(&itemID), sizeof(itemID));
+			for (auto& it : Game::Instance().configurator.config.items) {
+				if (itemID == it->ID) {
+					std::string phrase = "";
+
+					for (auto& itt : Game::Instance().configurator.config.roomDescs) {
+						if (itt.itemDescs.size() == 1) {
+							phrase = std::vformat(std::string_view(itt.itemDescs[0]), std::make_format_args(it->name));
+						}
+						else {
+							phrase = std::vformat(std::string_view(itt.itemDescs[rand() % itt.itemDescs.size()]), std::make_format_args(it->name));
+						}
+					}
+
+					itemDescription.push_back(RoomDescElement(it->ID, phrase));
+					items.push_back(it->clone());
+				}
+			}
+		}
+
+		uint32_t enemyCount;
+		infile.read(reinterpret_cast<char*>(&enemyCount), sizeof(enemyCount));
+
+		for (int i = 0; i < enemyCount; i++) {
+			uint32_t enemyID;
+			infile.read(reinterpret_cast<char*>(&enemyID), sizeof(enemyID));
+			for (auto& it : Game::Instance().configurator.config.enemies) {
+				if (enemyID == it->ID) {
+					std::string phrase = "";
+
+					for (auto& itt : Game::Instance().configurator.config.roomDescs) {
+						if (itt.enemiesDescs.size() == 1) {
+							phrase = std::vformat(std::string_view(itt.enemiesDescs[0]), std::make_format_args(it->name));
+						}
+						else {
+							phrase = std::vformat(std::string_view(itt.enemiesDescs[rand() % itt.enemiesDescs.size()]), std::make_format_args(it->name));
+						}
+					}
+
+					enemyDescription.push_back(RoomDescElement(it->ID, phrase));
+					enemies.push_back(it->clone());
+				}
+			}
+		}
+	}
+
+	void ExitRoom::load(std::ifstream& infile) {
+		uint32_t itemCount;
+		infile.read(reinterpret_cast<char*>(&itemCount), sizeof(itemCount));
+
+		for (int i = 0; i < itemCount; i++) {
+			uint32_t itemID;
+			infile.read(reinterpret_cast<char*>(&itemID), sizeof(itemID));
+			for (auto& it : Game::Instance().configurator.config.items) {
+				if (itemID == it->ID) {
+					items.push_back(it->clone());
+				}
+			}
+		}
+
+		uint32_t enemyCount;
+		infile.read(reinterpret_cast<char*>(&enemyCount), sizeof(enemyCount));
+
+		for (int i = 0; i < enemyCount; i++) {
+			uint32_t enemyID;
+			infile.read(reinterpret_cast<char*>(&enemyID), sizeof(enemyID));
+			for (auto& it : Game::Instance().configurator.config.enemies) {
+				if (enemyID == it->ID) {
+					enemies.push_back(it->clone());
+				}
+			}
+		}
+	}
+
+	void Floor::load(std::ifstream& infile) {
+		uint32_t level32;
+		infile.read(reinterpret_cast<char*>(&level32), sizeof(level32));
+		infile.read(reinterpret_cast<char*>(&canGoUp), sizeof(canGoUp));
+		infile.read(reinterpret_cast<char*>(&canGoDown), sizeof(canGoDown));
+		level = level32;
+		exitCoordinates.load(infile);
+
+		//uint32_t sizeX = static_cast<uint32_t>(floorMask[0].size());
+		//uint32_t sizeY = static_cast<uint32_t>(floorMask.size());
+
+		uint32_t sizeX;
+		uint32_t sizeY;
+
+		infile.read(reinterpret_cast<char*>(&sizeX), sizeof(sizeX));
+		infile.read(reinterpret_cast<char*>(&sizeY), sizeof(sizeY));
+
+		floorMask.resize(sizeY, std::vector<int>(sizeX, 0));
+
+		for (int y = 0; y < sizeY; y++) {
+			for (int x = 0; x < sizeX; x++) {
+				uint8_t roomType;
+				infile.read(reinterpret_cast<char*>(&roomType), sizeof(roomType));
+
+				if (roomType == 0) {
+					floorMask[y][x] = 0;
+				}
+				else {
+					if (roomType == 1) {
+						floorMask[y][x] = 1;
+						uint32_t roomID;
+						infile.read(reinterpret_cast<char*>(&roomID), sizeof(roomID));
+						for (auto& it : Game::Instance().configurator.config.rooms) {
+							if (it->ID == roomID) {
+								std::shared_ptr<Room> room = it->clone();
+								bool isEx;
+								infile.read(reinterpret_cast<char*>(&isEx), sizeof(isEx));
+								room->isExit = isEx;
+								room->location.X = x;
+								room->location.Y = y;
+								room->location.F = level;
+								room->load(infile);
+								rooms.push_back(std::move(room));
+								break;
+							}
+						}
+					}
+					else if (roomType == 2) {
+						floorMask[y][x] = 1;
+						uint32_t roomID;
+						infile.read(reinterpret_cast<char*>(&roomID), sizeof(roomID));
+						for (auto& it : Game::Instance().configurator.config.rooms) {
+							if (it->ID == roomID) {
+								std::shared_ptr<Room> room = it->clone();
+								ExitRoom* rm = dynamic_cast<ExitRoom*>(room.get());
+								if (rm != nullptr) {
+									bool isEx;
+									infile.read(reinterpret_cast<char*>(&isEx), sizeof(isEx));
+									bool isBroken;
+									infile.read(reinterpret_cast<char*>(&isBroken), sizeof(isBroken));
+									rm->isExit = isEx;
+									rm->isBroken = isBroken;
+									rm->location.X = x;
+									rm->location.Y = y;
+									rm->location.F = level;
+									rm->load(infile);
+									rooms.push_back(std::move(room));
+									break;
+								}
+							}
+						}
+					}
 				}
 			}
 		}

@@ -75,10 +75,12 @@ void Session::firstTime() {
 			}
 
 			self->buffer.resize(256);
-			std::string first = Gigahrush::Game::Instance().Look(self->sessionPlayer.lock());
-			std::size_t bt = asio::write(self->socket, asio::buffer(first));
-
-			self->read();
+			auto p = self->sessionPlayer.lock();
+			if (p != nullptr) {
+				std::string first = Gigahrush::Game::Instance().Look(self->sessionPlayer.lock());
+				std::size_t bt = asio::write(self->socket, asio::buffer(first));
+				self->read();
+			}
 		}
 	);
 }
@@ -93,6 +95,8 @@ void Session::read() {
 			if (!ec) {
 				if (self->sessionPlayer.expired()) { 
 					std::cout << "anal";
+					self->sessionPlayer.reset();
+					self->sessionPlayer.lock() = nullptr;
 					std::size_t bt = asio::write(self->socket, asio::buffer("Ваш игрок был утерян в результате рестарта сервера, попробуйте снова\nВведите ник: "));
 					self->buffer.resize(256);
 					self->firstTime(); 
@@ -109,6 +113,7 @@ void Session::read() {
 				else {
 					std::size_t bt = asio::write(self->socket, asio::buffer("Ваш игрок был утерян в результате рестарта сервера, попробуйте снова\nВведите ник: "));
 					self->buffer.resize(256);
+					self->sessionPlayer.reset();
 					self->sessionPlayer.lock() = nullptr;
 					self->firstTime();
 				}

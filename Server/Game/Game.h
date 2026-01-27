@@ -88,6 +88,9 @@ namespace Gigahrush {
 			void SaveGame(std::string);
 			void LoadGame(std::string);
 
+			void SetPlayerLocation(Player*, Location);
+			void SetPlayerBattleEnemy(Player*, int enemyID);
+
 			//Commands
 
 			std::string CheckLevelUp(std::shared_ptr<Player>); // JSON Done

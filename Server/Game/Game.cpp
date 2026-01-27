@@ -344,7 +344,7 @@ namespace Gigahrush {
 		return g;
 	}
 
-	Game::Game(): isGenerated(false) {}
+	Game::Game(): isGenerated(false), isReseted(true) {}
 	Game::~Game() = default;
 
 	bool Game::changeDir(std::vector<std::vector<int>>& mask, int& X, int& Y, int& randDir) {
@@ -847,6 +847,7 @@ namespace Gigahrush {
 			auto end = std::chrono::high_resolution_clock::now();
 			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 			std::cout << "Game generated in " << duration << ", server now can be started!\n";
+			isReseted = false;
 			isGenerated = true;
 			return true;
 		}
@@ -892,7 +893,7 @@ namespace Gigahrush {
 			std::cout << "=== Players on server ===\n";
 			size_t c = 1;
 			for (auto& it : gamedata.players) {
-				std::cout << std::to_string(c) + ". " + it->username << "\n";
+				std::cout << std::to_string(c) + ". " + it->username << " on floor " << std::to_string(it->location->location.F) << "\n";
 				++c;
 			}
 		}
@@ -2597,10 +2598,52 @@ namespace Gigahrush {
 		return res;
 	}
 
-	void Game::SaveGame(std::string filename) {
-		//Players save
+	void Game::SetPlayerLocation(Player* ply, Location loc) {
+		for (auto& it : gamedata.floors) {
+			if (it->level == loc.F) {
+				for (auto& itt : it->rooms) {
+					if (itt->location == loc) {
+						ply->location = itt;
+						ply->floor = it;
+						std::cout << "Player set location on floor " << itt->location.F << "\n";
+						break;
+					}
+				}
+				break;
+			}
+		}
+	}
 
-		std::ofstream outFile(filename + "_players.GSAVE", std::ios::binary);
+	void Game::SetPlayerBattleEnemy(Player* ply, int enemyID) {
+		for (auto& it : ply->location->enemies) {
+			if (it->ID == enemyID) {
+				if (it->battleWith == nullptr) {
+					for (auto& itt : gamedata.players) {
+						if (itt->username == ply->username) {
+							it->battleWith = itt;
+							ply->battleStatus.enemy = it;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void Game::SaveGame(std::string filename) {
+		//World save
+
+		std::ofstream outFile(filename + ".GSAVE", std::ios::binary);
+		uint32_t floorscount = static_cast<uint32_t>(gamedata.floors.size());
+		outFile.write(reinterpret_cast<const char*>(&floorscount), sizeof(floorscount));
+
+		for (auto& it : gamedata.floors) {
+			it->save(outFile);
+		}
+
+		//EOF World save
+		std::cout << "Save world in" << filename << ".GSAVE" << "\n";
+
+		//Players save
 		uint32_t playerscount = static_cast<uint32_t>(gamedata.players.size());
 		outFile.write(reinterpret_cast<const char*>(&playerscount),sizeof(playerscount));
 
@@ -2609,7 +2652,7 @@ namespace Gigahrush {
 		}
 
 		//EOF Players save
-		std::cout << "Save " << filename << "\n";
+		std::cout << "Save players in" << filename << ".GSAVE" << "\n";
 
 		outFile.close();
 	}
@@ -2623,29 +2666,49 @@ namespace Gigahrush {
 			std::cout << "You need reset game before loading!\n";
 			return;
 		}
-		//Player load
-		gamedata.players = std::vector<std::shared_ptr<Player>>(); //Обнуляю текущих игроков
+		//World load
+		gamedata = GameData();
 
 		try {
-			std::ifstream inFile(filename + "_players.GSAVE", std::ios::binary);
+			std::ifstream infile(filename + ".GSAVE", std::ios::binary);
 
-			if (!inFile.is_open()) {
+			if (!infile.is_open()) {
 				std::cout << "File load error!";
 				return;
 			}
 
+			uint32_t floorscount = static_cast<uint32_t>(gamedata.floors.size());
+			infile.read(reinterpret_cast<char*>(&floorscount), sizeof(floorscount));
+
+			for (int i = 0; i < floorscount; i++) {
+				std::shared_ptr<Floor> flr = std::make_shared<Floor>(
+					0,
+					std::vector<std::shared_ptr<Room>>{},
+					std::vector<std::vector<int>>{},
+					Location{ 0, 0, 0 },
+					true,
+					true
+				);
+				flr->load(infile);
+				gamedata.floors.push_back(std::move(flr));
+			}
+
+			//Player load
+
 			uint32_t plyCount;
-			inFile.read(reinterpret_cast<char*>(&plyCount), sizeof(plyCount));
+			infile.read(reinterpret_cast<char*>(&plyCount), sizeof(plyCount));
 
 			for (int i = 0; i < plyCount; i++) {
 				std::string baseName = "player";
 				std::weak_ptr<Player> ply = SpawnPlayer(baseName);
-				ply.lock()->load(inFile);
+				ply.lock()->load(infile);
 			}
 
 			std::cout << "Load " << filename << "\n";
 
-			inFile.close();
+			infile.close();
+
+			isGenerated = true;
 		}
 		catch (const std::exception& e) {
 			std::cout << "Error!";

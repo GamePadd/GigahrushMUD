@@ -53,6 +53,28 @@ namespace Gigahrush {
 		bool operator== (const Location& xd) const {
 			return (X == xd.X && Y == xd.Y && F == xd.F);
 		}
+
+		void save(std::ofstream& outfile) {
+			uint32_t X32 = static_cast<uint32_t>(X);
+			uint32_t Y32 = static_cast<uint32_t>(Y);
+			uint32_t F32 = static_cast<uint32_t>(F);
+			outfile.write(reinterpret_cast<const char*>(&X32), sizeof(X32));
+			outfile.write(reinterpret_cast<const char*>(&Y32), sizeof(Y32));
+			outfile.write(reinterpret_cast<const char*>(&F32), sizeof(F32));
+		}
+
+		void load(std::ifstream& infile) {
+			uint32_t X32;
+			uint32_t Y32;
+			uint32_t F32;
+			infile.read(reinterpret_cast<char*>(&X32), sizeof(X32));
+			infile.read(reinterpret_cast<char*>(&Y32), sizeof(Y32));
+			infile.read(reinterpret_cast<char*>(&F32), sizeof(F32));
+
+			X = X32;
+			Y = Y32;
+			F = F32;
+		}
 	};
 
 	class Item {
@@ -242,6 +264,17 @@ namespace Gigahrush {
 	struct Battle {
 		Status status;
 		std::shared_ptr<Enemy> enemy;
+
+		void save(std::ofstream& outfile) {
+			if (status == Status::InBattle) {
+				outfile.put(1);
+				uint32_t enID = static_cast<uint32_t>(enemy->ID);
+				outfile.write(reinterpret_cast<const char*>(&enID), sizeof(enID));
+			}
+			else {
+				outfile.put(0);
+			}
+		}
 	};
 
 	struct Player {
@@ -253,22 +286,7 @@ namespace Gigahrush {
 		PlayerStats stats;
 		std::atomic<bool> isInSession;
 
-		void save(std::ofstream& outfile) {
-			uint32_t username_size = static_cast<uint32_t>(username.size());
-			outfile.write(reinterpret_cast<const char*>(&username_size), sizeof(username_size));
-			outfile.write(reinterpret_cast<const char*>(username.data()), username_size);
-
-			stats.save(outfile);
-
-			//Save inventory
-			uint32_t inv_size = static_cast<uint32_t>(inventory.size());
-			outfile.write(reinterpret_cast<const char*>(&inv_size), sizeof(inv_size));
-
-			for (auto& it : inventory) {
-				uint32_t itID = static_cast<uint32_t>(it->ID);
-				outfile.write(reinterpret_cast<const char*>(&itID), sizeof(itID));
-			}
-		}
+		void save(std::ofstream& outfile);
 
 		void load(std::ifstream& infile);
 	};
@@ -288,6 +306,28 @@ namespace Gigahrush {
 		std::vector<std::shared_ptr<Enemy>> enemies;
 		bool isExit;
 		Location location;
+
+		virtual void save(std::ofstream& outfile) {
+			uint32_t ID32 = static_cast<uint32_t>(ID);
+			outfile.write(reinterpret_cast<const char*>(&ID32), sizeof(ID32));
+			outfile.write(reinterpret_cast<const char*>(&isExit), sizeof(isExit));
+
+			uint32_t itemCount = static_cast<uint32_t>(items.size());
+			outfile.write(reinterpret_cast<const char*>(&itemCount), sizeof(itemCount));
+			for (auto& it : items) {
+				uint32_t itID = static_cast<uint32_t>(it->ID);
+				outfile.write(reinterpret_cast<const char*>(&itID), sizeof(itID));
+			}
+
+			uint32_t enemyCount = static_cast<uint32_t>(enemies.size());
+			outfile.write(reinterpret_cast<const char*>(&enemyCount), sizeof(enemyCount));
+			for (auto& it : enemies) {
+				uint32_t itID = static_cast<uint32_t>(it->ID);
+				outfile.write(reinterpret_cast<const char*>(&itID), sizeof(itID));
+			}
+		}
+
+		virtual void load(std::ifstream& infile);
 
 		Room(int _ID, std::string _name, std::string _description,
 			std::vector<RoomDescElement> _itemDescription,
@@ -366,6 +406,29 @@ namespace Gigahrush {
 		bool isBroken;
 		std::vector<int> repairRecipe;
 
+		void save(std::ofstream& outfile) override {
+			uint32_t ID32 = static_cast<uint32_t>(ID);
+			outfile.write(reinterpret_cast<const char*>(&ID32), sizeof(ID32));
+			outfile.write(reinterpret_cast<const char*>(&isExit), sizeof(isExit));
+			outfile.write(reinterpret_cast<const char*>(&isBroken), sizeof(isBroken));
+
+			uint32_t itemCount = static_cast<uint32_t>(items.size());
+			outfile.write(reinterpret_cast<const char*>(&itemCount), sizeof(itemCount));
+			for (auto& it : items) {
+				uint32_t itID = static_cast<uint32_t>(it->ID);
+				outfile.write(reinterpret_cast<const char*>(&itID), sizeof(itID));
+			}
+
+			uint32_t enemyCount = static_cast<uint32_t>(enemies.size());
+			outfile.write(reinterpret_cast<const char*>(&enemyCount), sizeof(enemyCount));
+			for (auto& it : enemies) {
+				uint32_t itID = static_cast<uint32_t>(it->ID);
+				outfile.write(reinterpret_cast<const char*>(&itID), sizeof(itID));
+			}
+		}
+
+		virtual void load(std::ifstream& infile) override;
+
 		ExitRoom(int _ID, std::string _name, std::string _description,
 			std::vector<RoomDescElement> _itemDescription,
 			std::vector<RoomDescElement> _enemyDescription,
@@ -406,6 +469,53 @@ namespace Gigahrush {
 			exitCoordinates(_exitCoordinates),
 			canGoUp(_canGoUp),
 			canGoDown(_canGoDown) {}
+
+		void save(std::ofstream& outfile) {
+			uint32_t level32 = static_cast<uint32_t>(level);
+			outfile.write(reinterpret_cast<const char*>(&level32), sizeof(level32));
+
+			outfile.write(reinterpret_cast<const char*>(&canGoUp), sizeof(canGoUp));
+			outfile.write(reinterpret_cast<const char*>(&canGoDown), sizeof(canGoDown));
+
+			exitCoordinates.save(outfile);
+
+			uint32_t sizeX = static_cast<uint32_t>(floorMask[0].size());
+			uint32_t sizeY = static_cast<uint32_t>(floorMask.size());
+
+			outfile.write(reinterpret_cast<const char*>(&sizeX), sizeof(sizeX));
+			outfile.write(reinterpret_cast<const char*>(&sizeY), sizeof(sizeY));
+
+			for (int y = 0; y < floorMask.size(); y++) {
+				for (int x = 0; x < floorMask[0].size(); x++) {
+					if (floorMask[y][x] == 0) {
+						//No room
+						outfile.put(0);
+					}
+					else {
+						if (x == exitCoordinates.X && y == exitCoordinates.Y) {
+							//exit
+							outfile.put(2);
+							for (auto& it : rooms) {
+								if (it->location.X == x && it->location.Y == y) {
+									it->save(outfile);
+								}
+							}
+						}
+						else {
+							//just room
+							outfile.put(1);
+							for (auto& it : rooms) {
+								if (it->location.X == x && it->location.Y == y) {
+									it->save(outfile);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		void load(std::ifstream&);
 		/*
 		Floor(const Floor& other) :
 			level(other.level),
