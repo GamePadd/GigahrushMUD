@@ -212,9 +212,8 @@ void MainThread() {
 
 		elements.push_back(ftxui::paragraph(map));
 
-		return ftxui::vbox(elements) | ftxui::frame |
-			ftxui::vscroll_indicator | ftxui::focusPositionRelative(0.0f, 1.0f);
-		});
+		return ftxui::vbox(elements) | ftxui::focusPositionRelative(0.0f, 1.0f);
+	});
 
 	ftxui::Component mainInputHandler = ftxui::CatchEvent(commandInput, [&](ftxui::Event event) {
 		if (event == ftxui::Event::Return) {
@@ -277,14 +276,14 @@ void MainThread() {
 			ftxui::hbox(ftxui::text("Команда: "), commandInput->Render()) }) | ftxui::flex;
 		auto game_window = ftxui::window(ftxui::text("Гигахрущ"), game_box) | ftxui::color(MAIN_COLOR);
 
-		auto server_box = ftxui::vbox({ serverWindow->Render() | ftxui::vscroll_indicator | ftxui::frame | ftxui::flex }) | ftxui::flex;
+		auto server_box = ftxui::vbox({ serverWindow->Render() | ftxui::frame | ftxui::flex }) | ftxui::flex;
 		auto server_window = ftxui::window(ftxui::text("Оповещения сервера"), server_box) | ftxui::color(ADD_COLOR2) | ftxui::flex;
 
-		auto map_box = ftxui::vbox({ mapWindow->Render() | ftxui::vscroll_indicator | ftxui::frame | ftxui::flex }) | ftxui::flex;
+		auto map_box = ftxui::vbox({ mapWindow->Render() | ftxui::frame | ftxui::flex }) | ftxui::flex;
 		auto map_window = ftxui::window(ftxui::text("Карта"), map_box) | ftxui::color(ADD_COLOR1) | ftxui::flex;
 
 		auto right_column = ftxui::vbox({
-			server_window | ftxui::flex_grow,
+			server_window | ftxui::flex_grow | ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 9),
 			map_window | ftxui::flex_grow
 		}) | ftxui::flex;  
 
