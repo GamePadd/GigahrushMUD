@@ -1999,6 +1999,8 @@ namespace Gigahrush {
 		res["content"]["checkPlayerDeath"] = nlohmann::json::object();
 		res["content"]["levelUp"] = nlohmann::json::object();
 
+		res["content"]["pickedUpWinItem"] = false;
+
 		if (ply->battleStatus.status != InBattle) { res["content"]["inBattle"] = false; return res.dump(); }
 
 		bool isEnemyDead = false;
@@ -2046,8 +2048,14 @@ namespace Gigahrush {
 
 						for (auto& it : configurator.config.items) {
 							if (it->ID == randItemFromEnemyID) {
-								ply->inventory.push_back(it->clone());
-								res["content"]["itemFromEnemy"] = it->name;
+								if (ply->inventory.size() < ply->stats.inventoryMaxSize) {
+									ply->inventory.push_back(it->clone());
+									res["content"]["itemFromEnemy"] = it->name;
+									res["content"]["pickedUpWinItem"] = true;
+								}
+								else {
+									res["content"]["pickedUpWinItem"] = false;
+								}
 								break;
 							}
 						}

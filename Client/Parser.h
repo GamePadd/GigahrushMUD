@@ -769,10 +769,17 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 				ftxui::text(" опыта") | ftxui::color(DECORATE_COLOR)
 			}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 
-			logs.push_back(ftxui::hflow({
-				ftxui::text("Вы получили с врага предмет ") | ftxui::color(DECORATE_COLOR),
-				ftxui::text(obj["content"]["itemFromEnemy"].get<std::string>()) | ftxui::color(ITEM_COLOR),
-			}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+			if (obj["content"]["pickedUpWinItem"].get<bool>() == true) {
+				logs.push_back(ftxui::hflow({
+					ftxui::text("Вы получили с врага предмет ") | ftxui::color(DECORATE_COLOR),
+					ftxui::text(obj["content"]["itemFromEnemy"].get<std::string>()) | ftxui::color(ITEM_COLOR),
+				}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+			}
+			else {
+				logs.push_back(ftxui::hflow({
+					ftxui::paragraph("Вы не смогли получить с врага предмет, ваш инвентарь полон!") | ftxui::color(ENEMY_COLOR),
+				}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+			}
 		}
 
 		//Check death
