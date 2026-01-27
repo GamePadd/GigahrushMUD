@@ -1,4 +1,5 @@
 ﻿#include "Session.h"
+#include <nlohmann/json.hpp>
 
 Session::Session(asio::ip::tcp::socket&& socket) : 
 	socket(std::move(socket)), 
@@ -24,10 +25,16 @@ void Session::firstTime() {
 				return;
 			}
 
+			nlohmann::json err;
+			err["type"] = "ANSWER";
+			err["content"]["type"] = "SessionError";
+			err["content"]["text"] = "";
+
 			self->buffer.resize(bytes_received);
 
 			if (bytes_received == 0) {
-				std::size_t bt = asio::write(self->socket, asio::buffer("Вы ввели пустой ник"));
+				err["content"]["text"] = "Вы ввели пустой ник";
+				std::size_t bt = asio::write(self->socket, asio::buffer(err.dump()));
 				self->buffer.resize(256);
 				self->firstTime();
 				return;
@@ -36,7 +43,8 @@ void Session::firstTime() {
 			std::string nickname = self->buffer;
 
 			if (!Gigahrush::Game::Instance().isGenerated) {
-				std::size_t bt = asio::write(self->socket, asio::buffer("Игра не сгенерирована, подождите"));
+				err["content"]["text"] = "Игра не сгенерирована, подождите";
+				std::size_t bt = asio::write(self->socket, asio::buffer(err.dump()));
 				self->buffer.resize(256);
 				self->firstTime();
 				return;
@@ -53,7 +61,8 @@ void Session::firstTime() {
 			}
 
 			if (isPlayerFound && isFoundPlayerPlaying) {
-				std::size_t bt = asio::write(self->socket, asio::buffer("Данный игрок уже играет на сервере"));
+				err["content"]["text"] = "Данный игрок уже играет на сервере";
+				std::size_t bt = asio::write(self->socket, asio::buffer(err.dump()));
 				self->buffer.resize(256);
 				self->firstTime();
 				return;
@@ -93,11 +102,17 @@ void Session::read() {
 	socket.async_read_some(asio::buffer(buffer),
 		[self = shared_from_this()](std::error_code ec, std::size_t bytes_received) {
 			if (!ec) {
+				nlohmann::json err;
+				err["type"] = "ANSWER";
+				err["content"]["type"] = "SessionError";
+				err["content"]["text"] = "";
+
 				if (self->sessionPlayer.expired()) { 
-					std::cout << "anal";
+					//std::cout << "anal";
 					self->sessionPlayer.reset();
 					self->sessionPlayer.lock() = nullptr;
-					std::size_t bt = asio::write(self->socket, asio::buffer("Ваш игрок был утерян в результате рестарта сервера, попробуйте снова\nВведите ник: "));
+					err["content"]["text"] = "Ваш игрок был утерян в результате рестарта сервера, попробуйте снова\nВведите ник: ";
+					std::size_t bt = asio::write(self->socket, asio::buffer(err.dump()));
 					self->buffer.resize(256);
 					self->firstTime(); 
 				}
@@ -111,7 +126,8 @@ void Session::read() {
 					self->read();
 				} 
 				else {
-					std::size_t bt = asio::write(self->socket, asio::buffer("Ваш игрок был утерян в результате рестарта сервера, попробуйте снова\nВведите ник: "));
+					err["content"]["text"] = "Ваш игрок был утерян в результате рестарта сервера, попробуйте снова\nВведите ник: ";
+					std::size_t bt = asio::write(self->socket, asio::buffer(err.dump()));
 					self->buffer.resize(256);
 					self->sessionPlayer.reset();
 					self->sessionPlayer.lock() = nullptr;

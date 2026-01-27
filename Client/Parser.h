@@ -853,4 +853,9 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 			}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 		}
 	}
+	else if (obj["content"]["type"] == "SessionError") {
+		logs.push_back(ftxui::hflow({
+			ftxui::paragraph(obj["content"]["text"]) | ftxui::color(ENEMY_COLOR)
+		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+	}
 }
