@@ -290,7 +290,7 @@ void MainThread() {
 		auto main_layout = ftxui::hbox({
 			game_window | ftxui::flex_grow,
 			right_column | ftxui::flex_grow  
-		}) | ftxui::flex; 
+		}) | ftxui::flex;
 
 		return main_layout;
 

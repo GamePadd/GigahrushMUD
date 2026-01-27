@@ -22,7 +22,6 @@ void Server::async_accept() {
 }
 
 void Server::mapUpdate(const asio::error_code& ec) {
-	newPlayerNotify("test");
 	for (auto& it : allSessions) {
 		try {
 			if (auto p = it.lock()) {
