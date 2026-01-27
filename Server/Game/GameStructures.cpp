@@ -302,7 +302,7 @@ namespace Gigahrush {
 							phrase = std::vformat(std::string_view(itt.itemDescs[0]), std::make_format_args(it->name));
 						}
 						else {
-							phrase = std::vformat(std::string_view(itt.itemDescs[rand() % itt.itemDescs.size()]), std::make_format_args(it->name));
+							phrase = std::vformat(std::string_view(itt.itemDescs[rand() % (itt.itemDescs.size()-1)]), std::make_format_args(it->name));
 						}
 					}
 
@@ -327,7 +327,7 @@ namespace Gigahrush {
 							phrase = std::vformat(std::string_view(itt.enemiesDescs[0]), std::make_format_args(it->name));
 						}
 						else {
-							phrase = std::vformat(std::string_view(itt.enemiesDescs[rand() % itt.enemiesDescs.size()]), std::make_format_args(it->name));
+							phrase = std::vformat(std::string_view(itt.enemiesDescs[rand() % (itt.enemiesDescs.size()-1)]), std::make_format_args(it->name));
 						}
 					}
 

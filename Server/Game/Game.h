@@ -91,6 +91,8 @@ namespace Gigahrush {
 			void SetPlayerLocation(Player*, Location);
 			void SetPlayerBattleEnemy(Player*, int enemyID);
 
+			void AddRepairItemsToFloor(std::shared_ptr<Floor>);
+
 			//Commands
 
 			std::string CheckLevelUp(std::shared_ptr<Player>); // JSON Done

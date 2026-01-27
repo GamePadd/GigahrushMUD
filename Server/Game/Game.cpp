@@ -624,7 +624,7 @@ namespace Gigahrush {
 							phrase = std::vformat(std::string_view(it.itemDescs[0]), std::make_format_args(itName));
 						}
 						else {
-							phrase = std::vformat(std::string_view(it.itemDescs[rand() % it.itemDescs.size()]), std::make_format_args(itName));
+							phrase = std::vformat(std::string_view(it.itemDescs[rand() % (it.itemDescs.size()-1)]), std::make_format_args(itName));
 						}
 
 						//phrase = it.itemDescs[rand() % it.itemDescs.size()];
@@ -682,7 +682,7 @@ namespace Gigahrush {
 							phrase = std::vformat(std::string_view(it.enemiesDescs[0]), std::make_format_args(enName));
 						}
 						else {
-							phrase = std::vformat(std::string_view(it.enemiesDescs[rand() % it.enemiesDescs.size()]), std::make_format_args(enName));
+							phrase = std::vformat(std::string_view(it.enemiesDescs[rand() % (it.enemiesDescs.size()-1)]), std::make_format_args(enName));
 						}
 						//phrase = it.enemiesDescs[rand() % it.enemiesDescs.size()];
 						//sprintf(&phrase[0], enName.c_str());
@@ -699,6 +699,47 @@ namespace Gigahrush {
 
 		rm->items = std::move(items);
 		rm->enemies = enemies;
+	}
+
+	void Game::AddRepairItemsToFloor(std::shared_ptr<Floor> flr) {
+		for (auto& it : flr->rooms) {
+			if (it->isExit == true) {
+				ExitRoom* rm = dynamic_cast<ExitRoom*>(it.get());
+				if (rm != nullptr) {
+					std::vector<int> repRec = rm->repairRecipe;
+					for (auto xd : repRec) {
+						for (auto& item : configurator.config.items) {
+							if (item->ID == xd) {
+								std::shared_ptr<Room> randRoom;
+								if (flr->rooms.size() == 1) {
+									randRoom = flr->rooms[0];
+								}
+								else {
+									randRoom = flr->rooms[rand() % (flr->rooms.size() - 1)];
+								}
+
+								std::string phrase = "";
+
+								for (auto& it : configurator.config.roomDescs) {
+									if (randRoom->ID == it.ID) {
+										if (it.itemDescs.size() == 1) {
+											phrase = std::vformat(std::string_view(it.itemDescs[0]), std::make_format_args(item->name));
+										}
+										else {
+											phrase = std::vformat(std::string_view(it.itemDescs[rand() % (it.itemDescs.size()-1)]), std::make_format_args(item->name));
+										}
+									}
+								}
+
+								randRoom->itemDescription.push_back(RoomDescElement(item->ID, phrase));
+								randRoom->items.push_back(item->clone());
+								std::cout << "Add repair " << item->name << " on floor " << std::to_string(flr->level) << " [" << std::to_string(randRoom->location.X) << ", " << std::to_string(randRoom->location.Y) << "]\n";
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	std::shared_ptr<Room> Game::GenerateRoom(Location loc, bool isExit) {
@@ -768,12 +809,16 @@ namespace Gigahrush {
 			ExitRoom* rmm = dynamic_cast<ExitRoom*>(room.get());
 
 			if (rmm != nullptr) { 
-				if (rand() % 100 < 5) {
+				rmm->isBroken = true;
+				
+
+
+				/*if (rand() % 100 < 5) {
 					rmm->isBroken = true;
 				}
 				else {
 					rmm->isBroken = false;
-				}
+				}*/
 			}
 
 			GenerateItemsAndEnemies(room);
@@ -834,6 +879,8 @@ namespace Gigahrush {
 					}
 				}
 			}
+
+			AddRepairItemsToFloor(flr);
 			gamedata.floors.push_back(flr);
 		}
 	}
@@ -913,7 +960,7 @@ namespace Gigahrush {
 		for (auto& it : gamedata.floors) {
 			if (it->level == 1) {
 				ply->floor = it;
-				ply->location = it->rooms[rand() % it->rooms.size()];
+				ply->location = it->rooms[rand() % (it->rooms.size()-1)];
 			}
 		}
 
@@ -1401,7 +1448,7 @@ namespace Gigahrush {
 							phrase = std::vformat(std::string_view(it.itemDescs[0]), std::make_format_args(item));
 						}
 						else {
-							phrase = std::vformat(std::string_view(it.itemDescs[rand() % it.itemDescs.size()]), std::make_format_args(item));
+							phrase = std::vformat(std::string_view(it.itemDescs[rand() % (it.itemDescs.size()-1)]), std::make_format_args(item));
 						}
 					}
 				}
@@ -1609,13 +1656,13 @@ namespace Gigahrush {
 
 		ExitRoom* rmm = dynamic_cast<ExitRoom*>(ply->location.get());
 
-		if (rmm != nullptr) {
+		/*if (rmm != nullptr) {
 			if (rand() % 100 < 5) {
 				rmm->isBroken = true;
 				res["content"]["isPlayerBrokeElevator"] = true;
 				return res.dump();
 			}
-		}
+		}*/
 
 		if (rmm != nullptr && rmm->isBroken == true) {
 			res["content"]["isElevatorBroken"] = true;
@@ -2241,7 +2288,7 @@ namespace Gigahrush {
 							phrase = std::vformat(std::string_view(it.itemDescs[0]), std::make_format_args(ply->inventory[i]->name));
 						}
 						else {
-							phrase = std::vformat(std::string_view(it.itemDescs[rand() % it.itemDescs.size()]), std::make_format_args(ply->inventory[i]->name));
+							phrase = std::vformat(std::string_view(it.itemDescs[rand() % (it.itemDescs.size()-1)]), std::make_format_args(ply->inventory[i]->name));
 						}
 					}
 				}
@@ -2259,7 +2306,7 @@ namespace Gigahrush {
 			for (auto& it : gamedata.floors) {
 				if (it->level == 1) {
 					ply->floor = it;
-					ply->location = it->rooms[rand() % it->rooms.size()];
+					ply->location = it->rooms[rand() % (it->rooms.size()-1)];
 				}
 			}
 		}
@@ -2649,7 +2696,7 @@ namespace Gigahrush {
 		}
 
 		//EOF World save
-		std::cout << "Save world in" << filename << ".GSAVE" << "\n";
+		std::cout << "Save world in " << filename << ".GSAVE" << "\n";
 
 		//Players save
 		uint32_t playerscount = static_cast<uint32_t>(gamedata.players.size());
@@ -2660,12 +2707,17 @@ namespace Gigahrush {
 		}
 
 		//EOF Players save
-		std::cout << "Save players in" << filename << ".GSAVE" << "\n";
+		std::cout << "Save players in " << filename << ".GSAVE" << "\n";
 
 		outFile.close();
 	}
 
 	void Game::LoadGame(std::string filename) {
+		if (configurator.config.configLoaded == false) {
+			std::cout << "Cant load game while config not loaded!\n";
+			return;
+		}
+
 		/*if (isGenerated == true) {
 			std::cout << "Cant load game while started!\n";
 			return;
@@ -2681,7 +2733,7 @@ namespace Gigahrush {
 			std::ifstream infile(filename + ".GSAVE", std::ios::binary);
 
 			if (!infile.is_open()) {
-				std::cout << "File load error!";
+				std::cout << "File load error!\n";
 				return;
 			}
 
@@ -2719,7 +2771,7 @@ namespace Gigahrush {
 			isGenerated = true;
 		}
 		catch (const std::exception& e) {
-			std::cout << "Error!";
+			std::cout << "Error!\n";
 		}
 	}
 }
