@@ -138,7 +138,8 @@ void UpdateMsgThread() {
 				}
 			}
 			catch (std::exception& er) {
-				logs.push_back(ftxui::text(er.what()) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+				//Пока уберу для релиза
+				//logs.push_back(ftxui::text(er.what()) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 			}
 
 			screen.PostEvent(ftxui::Event::Special("refresh"));
