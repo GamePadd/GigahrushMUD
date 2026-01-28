@@ -2803,6 +2803,7 @@ namespace Gigahrush {
 			infile.close();
 
 			isGenerated = true;
+			srv->stopSamosbor(false);
 		}
 		catch (const std::exception& e) {
 			std::cout << "Error!\n";
