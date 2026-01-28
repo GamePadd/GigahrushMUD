@@ -27,6 +27,11 @@ namespace Gigahrush {
 		rs["type"] = "ANSWER";
 		rs["content"]["type"] = "";
 
+		if (ply->stats.isDead == true) {
+			rs["content"]["type"] = "youDead";
+			return rs.dump();
+		}
+
 		if (comm == commands.end()) { rs["content"]["type"] = "unknown"; return rs.dump(); }
 		if (commands[commandS].allowedInBattle == false && inBattle) { rs["content"]["type"] =  "inBattle"; return rs.dump();}
 		if (commands[commandS].argc == 0) {

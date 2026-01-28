@@ -101,6 +101,8 @@ namespace Gigahrush {
 
 			void AddRepairItemsToFloor(std::shared_ptr<Floor>);
 
+			std::string RespawnPlayer(std::shared_ptr<Player>);
+
 			//Commands
 
 			std::string CheckLevelUp(std::shared_ptr<Player>); // JSON Done

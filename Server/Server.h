@@ -13,12 +13,15 @@ class Server {
 		asio::steady_timer samosborIntervalTimer;
 		asio::steady_timer samosborDuringTimer;
 		asio::steady_timer timer2;
+		asio::steady_timer timer3;
 
 	public:
 		std::vector<std::weak_ptr<Session>> allSessions;
 		Server(asio::io_context& io_context, std::uint16_t port);
 		void newPlayerNotify(std::string);
 		void disconnectPlayerNotify(std::string);
+
+		void notifyAll(const std::string&);
 
 		//Timers
 		void mapUpdate(const asio::error_code&);

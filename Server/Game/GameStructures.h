@@ -246,6 +246,8 @@ namespace Gigahrush {
 		//Skill stats
 		int weaponSkill;
 
+		bool isDead;
+
 		void save(std::ofstream& outfile) {
 			outfile.write(reinterpret_cast<const char*>(&health),sizeof(health));
 			outfile.write(reinterpret_cast<const char*>(&armor), sizeof(armor));

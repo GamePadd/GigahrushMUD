@@ -53,6 +53,12 @@ void addPlayerDeath(std::vector<ftxui::Element>& logs, const nlohmann::json& obj
 		ftxui::paragraph(std::to_string(obj["Floor"].get<int>())) | ftxui::color(DECORATE_COLOR),
 		ftxui::text(" этаже") | ftxui::color(DECORATE_COLOR)
 	}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50)) ;
+
+	if (obj["canRespawn"].get<bool>() == false) {
+		logs.push_back(ftxui::hflow({
+			ftxui::paragraph("Вы не можете возродиться во время самосбора, после окончания самосбора вы возродитесь автоматически!") | ftxui::color(ENEMY_COLOR),
+		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+	}
 }
 
 void addLevelUp(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
@@ -865,6 +871,23 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 			ftxui::paragraph(obj["content"]["text"]) | ftxui::color(ENEMY_COLOR)
 		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 	}
+	else if (obj["content"]["type"] == "SamosborDeath") {
+		nlohmann::json playerDeath = obj["content"]["death"].get<nlohmann::json>();
+
+		if (!playerDeath.empty()) {
+			addPlayerDeath(logs, playerDeath);
+		}
+	}
+	else if (obj["content"]["type"] == "Respawn") {
+		logs.push_back(ftxui::hflow({
+			ftxui::text("Вы возродились!") | ftxui::color(ITEM_COLOR)
+		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+	}
+	else if (obj["content"]["type"] == "youDead") {
+		logs.push_back(ftxui::hflow({
+			ftxui::text("Вы не можете использовать команды пока мертвы!") | ftxui::color(ENEMY_COLOR)
+		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+	}
 }
 
 void addServerMsg(std::vector<ftxui::Element>& serverMessages, const nlohmann::json& obj) {
@@ -878,16 +901,55 @@ void addServerMsg(std::vector<ftxui::Element>& serverMessages, const nlohmann::j
 
 	if (obj["content"]["type"] == "NewPlayer") {
 		serverMessages.push_back(ftxui::hflow({
-			ftxui::text("Игрок ") | ftxui::color(DECORATE_COLOR),
+			ftxui::text("* Игрок ") | ftxui::color(DECORATE_COLOR),
 			ftxui::text(obj["content"]["name"].get<std::string>()) | ftxui::color(ITEM_COLOR),
 			ftxui::text(" подключился! ") | ftxui::color(DECORATE_COLOR)
 		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 	}
 	else if (obj["content"]["type"] == "PlayerDisconnect") {
 		serverMessages.push_back(ftxui::hflow({
-			ftxui::text("Игрок ") | ftxui::color(DECORATE_COLOR),
+			ftxui::text("* Игрок ") | ftxui::color(DECORATE_COLOR),
 			ftxui::text(obj["content"]["name"].get<std::string>()) | ftxui::color(ENEMY_COLOR),
 			ftxui::text(" отключился! ") | ftxui::color(DECORATE_COLOR)
 		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+	}
+	else if (obj["content"]["type"] == "SamosborWait") {
+		serverMessages.push_back(ftxui::hflow({
+			ftxui::paragraph("* Через") | ftxui::color(DECORATE_COLOR),
+			ftxui::text(" ") | ftxui::color(DECORATE_COLOR),
+			ftxui::paragraph(std::to_string(obj["content"]["time"].get<int>())) | ftxui::color(ENEMY_COLOR),
+			ftxui::text(" ") | ftxui::color(DECORATE_COLOR),
+			ftxui::paragraph("секунд начнётся самосбор! Спрячтесь в одном из укрытий чтобы не умереть: ") | ftxui::color(DECORATE_COLOR)
+		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+
+		std::vector<std::string> savePlaces = obj["content"]["savePlaces"].get<std::vector<std::string>>();
+		std::string res = "";
+
+		for (auto it : savePlaces) {
+			res += it + " ";
+		}
+
+		serverMessages.push_back(ftxui::hflow({
+			ftxui::paragraph(res) | ftxui::color(ITEM_COLOR),
+		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+	}
+	else if (obj["content"]["type"] == "SamosborStarted") {
+		serverMessages.push_back(ftxui::hflow({
+			ftxui::paragraph("* Начался самосбор! Переждите его в укрытие до его окончания!") | ftxui::color(ENEMY_COLOR),
+		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+	}
+	else if (obj["content"]["type"] == "SamosborEnded") {
+		serverMessages.push_back(ftxui::hflow({
+			ftxui::paragraph("* Самосбор завершился, вы можете выходить из укрытий!") | ftxui::color(ITEM_COLOR),
+		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+	}
+	else if (obj["content"]["type"] == "") {
+
+	}
+	else if (obj["content"]["type"] == "") {
+
+	}
+	else if (obj["content"]["type"] == "") {
+
 	}
 }

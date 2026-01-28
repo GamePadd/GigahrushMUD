@@ -27,7 +27,8 @@ void StartServer() {
 	srvv = &srv;
 
 	srv.startMapUpdate();
-	
+	srv.checkPlayersSamosbor();
+
 	Gigahrush::Game::Instance().srv = &srv;
 
 	while (!isExit) {

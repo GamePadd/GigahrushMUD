@@ -903,7 +903,7 @@ namespace Gigahrush {
 			std::cout << "Game generated in " << duration << ", server now can be started!\n";
 			isReseted = false;
 			isGenerated = true;
-			srv->waitSamosbor();
+			srv->stopSamosbor(false);
 			return true;
 		}
 		else {
@@ -963,12 +963,18 @@ namespace Gigahrush {
 		//Random spawning
 
 		ply->battleStatus.status = NotInBattle;
-		ply->stats = PlayerStats(100, 0, 1, 100, 0, configurator.config.maxInventorySize, false, 0, 0); //health,armor,level,toup,cur, max inv size, is weapon eq, weapon id, weaponskills
+		ply->stats = PlayerStats(100, 0, 1, 100, 0, configurator.config.maxInventorySize, false, 0, 0, false); //health,armor,level,toup,cur, max inv size, is weapon eq, weapon id, weaponskills
 
 		for (auto& it : gamedata.floors) {
 			if (it->level == 1) {
 				ply->floor = it;
-				ply->location = it->rooms[rand() % (it->rooms.size()-1)];
+				if (it->rooms.size() == 1) {
+					ply->location = it->rooms[0];
+				}
+				else {
+					ply->location = it->rooms[rand() % (it->rooms.size() - 1)];
+				}
+				//std::cout << ply->location->description;
 			}
 		}
 
@@ -2268,18 +2274,26 @@ namespace Gigahrush {
 
 		return res;*/
 
+
 		nlohmann::json res;
 		res["isDead"] = false;
+
+		if (ply->location == nullptr) { return res.dump(); }
+
 		res["x"] = ply->location->location.X;
 		res["y"] = ply->location->location.X;
 		res["Floor"] = ply->location->location.F;
+		res["canRespawn"] = true;
 
 		if (ply->stats.health <= 0) {
 			res["isDead"] = true;
-
-			ply->battleStatus.enemy->battleWith = nullptr;
-			ply->battleStatus.enemy = nullptr;
-			ply->battleStatus.status = NotInBattle;
+			ply->stats.isDead = true;
+			//сделать проверку сдох от врага или самосбора!
+			if (ply->battleStatus.status == InBattle) {
+				ply->battleStatus.enemy->battleWith = nullptr;
+				ply->battleStatus.enemy = nullptr;
+				ply->battleStatus.status = NotInBattle;
+			}
 
 			//inventory drop
 
@@ -2312,10 +2326,21 @@ namespace Gigahrush {
 			ply->stats.weaponSkill /= 2;
 			ply->stats.currentExp = 0;
 
+			if (samosborGoing) {
+				res["canRespawn"] = false;
+				return res.dump();
+			}
+
 			for (auto& it : gamedata.floors) {
 				if (it->level == 1) {
 					ply->floor = it;
-					ply->location = it->rooms[rand() % (it->rooms.size()-1)];
+					if (it->rooms.size() == 1) {
+						ply->location = it->rooms[0];
+					}
+					else {
+						ply->location = it->rooms[rand() % (it->rooms.size() - 1)];
+					}
+					ply->stats.isDead = false;
 				}
 			}
 		}
@@ -2781,6 +2806,27 @@ namespace Gigahrush {
 		}
 		catch (const std::exception& e) {
 			std::cout << "Error!\n";
+		}
+	}
+
+	std::string Game::RespawnPlayer(std::shared_ptr<Player> ply) {
+		if (ply->stats.isDead != true) { return ""; }
+
+		for (auto& it : gamedata.floors) {
+			if (it->level == 1) {
+				ply->floor = it;
+				if (it->rooms.size() == 1) {
+					ply->location = it->rooms[0];
+				}
+				else {
+					ply->location = it->rooms[rand() % (it->rooms.size() - 1)];
+				}
+				ply->stats.isDead = false;
+				nlohmann::json res;
+				res["type"] = "ANSWER";
+				res["content"]["type"] = "Respawn";
+				return res.dump();
+			}
 		}
 	}
 }

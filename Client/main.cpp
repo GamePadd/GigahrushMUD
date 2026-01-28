@@ -139,7 +139,7 @@ void UpdateMsgThread() {
 			}
 			catch (std::exception& er) {
 				//Пока уберу для релиза
-				//logs.push_back(ftxui::text(er.what()) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+				logs.push_back(ftxui::text(er.what()) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 			}
 
 			screen.PostEvent(ftxui::Event::Special("refresh"));
@@ -283,7 +283,7 @@ void MainThread() {
 		auto map_window = ftxui::window(ftxui::text("Карта"), map_box) | ftxui::color(ADD_COLOR1) | ftxui::flex;
 
 		auto right_column = ftxui::vbox({
-			server_window | ftxui::flex_grow | ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 9),
+			server_window | ftxui::flex_grow | ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 14),
 			map_window | ftxui::flex_grow
 		}) | ftxui::flex;  
 
