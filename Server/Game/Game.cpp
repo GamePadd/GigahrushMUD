@@ -2067,8 +2067,70 @@ namespace Gigahrush {
 
 		bool isEnemyDead = false;
 
+		auto doDmg = [&](int damage) {
+			ply->battleStatus.enemy->health = std::clamp(ply->battleStatus.enemy->health - (damage + ply->stats.weaponSkill), 0, 1000);
+
+			res["content"]["enemyName"] = ply->battleStatus.enemy->name;
+			res["content"]["makeDamage"] = damage;
+			res["content"]["skillDamage"] = ply->stats.weaponSkill;
+			res["content"]["enemyRemainHealth"] = ply->battleStatus.enemy->health;
+
+			if (ply->battleStatus.enemy->health <= 0) {
+				ply->stats.currentExp += ply->battleStatus.enemy->exp;
+
+				isEnemyDead = true;
+
+				res["content"]["isEnemyDead"] = true;
+				res["content"]["winExp"] = ply->battleStatus.enemy->exp;
+
+				int randItemFromEnemyID = 0;
+
+				res["content"]["levelUp"] = nlohmann::json::parse(CheckLevelUp(ply));
+
+				if (ply->battleStatus.enemy->loot.size() != 1) {
+					randItemFromEnemyID = ply->battleStatus.enemy->loot[rand() % (ply->battleStatus.enemy->loot.size() - 1)]->ID;
+				}
+				else {
+					randItemFromEnemyID = ply->battleStatus.enemy->loot[0]->ID;
+				}
+
+				for (auto& it : configurator.config.items) {
+					if (it->ID == randItemFromEnemyID) {
+						if (ply->inventory.size() < ply->stats.inventoryMaxSize) {
+							ply->inventory.push_back(it->clone());
+							res["content"]["itemFromEnemy"] = it->name;
+							res["content"]["pickedUpWinItem"] = true;
+						}
+						else {
+							res["content"]["pickedUpWinItem"] = false;
+						}
+						break;
+					}
+				}
+
+				for (int j = 0; j < ply->location->enemyDescription.size(); j++) {
+					if (ply->location->enemyDescription[j].ID == ply->battleStatus.enemy->ID) {
+						ply->location->enemyDescription.erase(ply->location->enemyDescription.begin() + j);
+						break;
+					}
+				}
+
+				for (int i = 0; i < ply->location->enemies.size(); i++) {
+					if (ply->location->enemies[i]->battleWith != nullptr) {
+						if (ply->location->enemies[i]->battleWith->username == ply->username) {
+							ply->location->enemies.erase(ply->location->enemies.begin() + i);
+							break;
+						}
+					}
+				}
+
+				ply->battleStatus.enemy->battleWith = nullptr;
+				ply->battleStatus.status = NotInBattle;
+			}
+		};
+
 		if (ply->stats.wepEq == false) {
-			res["content"]["wepEquiped"] = false;
+			doDmg(5);
 
 			if (isEnemyDead == false) {
 				res["content"]["enemyStep"] = nlohmann::json::parse(ply->battleStatus.enemy->Attack(ply));
@@ -2082,66 +2144,7 @@ namespace Gigahrush {
 			if (it->ID == ply->stats.weaponEqID) {
 				Weapon* wep = dynamic_cast<Weapon*>(it.get());
 				if (wep != nullptr) {
-					ply->battleStatus.enemy->health = std::clamp(ply->battleStatus.enemy->health - (wep->damage + ply->stats.weaponSkill), 0, 1000);
-					
-					res["content"]["enemyName"] = ply->battleStatus.enemy->name;
-					res["content"]["makeDamage"] = wep->damage;
-					res["content"]["skillDamage"] = ply->stats.weaponSkill;
-					res["content"]["enemyRemainHealth"] = ply->battleStatus.enemy->health;
-
-					if (ply->battleStatus.enemy->health <= 0) {
-						ply->stats.currentExp += ply->battleStatus.enemy->exp;
-
-						isEnemyDead = true;
-						
-						res["content"]["isEnemyDead"] = true;
-						res["content"]["winExp"] = ply->battleStatus.enemy->exp;
-
-						int randItemFromEnemyID = 0;
-
-						res["content"]["levelUp"] = nlohmann::json::parse(CheckLevelUp(ply));
-
-						if (ply->battleStatus.enemy->loot.size() != 1) {
-							randItemFromEnemyID = ply->battleStatus.enemy->loot[rand() % (ply->battleStatus.enemy->loot.size() - 1)]->ID;
-						}
-						else {
-							randItemFromEnemyID = ply->battleStatus.enemy->loot[0]->ID;
-						}
-
-						for (auto& it : configurator.config.items) {
-							if (it->ID == randItemFromEnemyID) {
-								if (ply->inventory.size() < ply->stats.inventoryMaxSize) {
-									ply->inventory.push_back(it->clone());
-									res["content"]["itemFromEnemy"] = it->name;
-									res["content"]["pickedUpWinItem"] = true;
-								}
-								else {
-									res["content"]["pickedUpWinItem"] = false;
-								}
-								break;
-							}
-						}
-
-						for (int j = 0; j < ply->location->enemyDescription.size(); j++) {
-							if (ply->location->enemyDescription[j].ID == ply->battleStatus.enemy->ID) {
-								ply->location->enemyDescription.erase(ply->location->enemyDescription.begin() + j);
-								break;
-							}
-						}
-
-						for (int i = 0; i < ply->location->enemies.size(); i++) {
-							if (ply->location->enemies[i]->battleWith != nullptr) {
-								if (ply->location->enemies[i]->battleWith->username == ply->username) {
-									ply->location->enemies.erase(ply->location->enemies.begin() + i);
-									break;
-								}
-							}
-						}
-
-						ply->battleStatus.enemy->battleWith = nullptr;
-						ply->battleStatus.status = NotInBattle;
-						break;
-					}
+					doDmg(wep->damage);
 					break;
 				}
 			}
