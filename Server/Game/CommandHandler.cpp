@@ -34,6 +34,11 @@ namespace Gigahrush {
 
 		if (comm == commands.end()) { rs["content"]["type"] = "unknown"; return rs.dump(); }
 		if (commands[commandS].allowedInBattle == false && inBattle) { rs["content"]["type"] =  "inBattle"; return rs.dump();}
+
+		if (commandS == "рецепты") {
+			return commands[commandS].func(ply, arg);
+		}
+
 		if (commands[commandS].argc == 0) {
 			return commands[commandS].func(ply, "");
 		}

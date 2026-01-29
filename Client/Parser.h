@@ -888,6 +888,59 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 			ftxui::text("Вы не можете использовать команды пока мертвы!") | ftxui::color(ENEMY_COLOR)
 		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 	}
+	else if (obj["content"]["type"] == "RecipesItem") {
+		if (obj["content"]["foundItem"].get<bool>() == false) {
+			logs.push_back(ftxui::hflow({
+				ftxui::paragraph("Не найден предмет!") | ftxui::color(ENEMY_COLOR)
+			}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+		}
+		else {
+			std::vector<std::string> itemRecipeNames = obj["content"]["itemsToCraft"].get<std::vector<std::string>>();
+
+			logs.push_back(ftxui::hflow({
+				ftxui::paragraph("Крафты с использованием этого предмета:") | ftxui::color(DECORATE_COLOR)
+			}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+
+			c = 1;
+
+			for (auto it : itemRecipeNames) {
+				logs.push_back(ftxui::hflow({
+					ftxui::paragraph(std::to_string(c) + ". " + it) | ftxui::color(ITEM_COLOR)
+				}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+				++c;
+			}
+		}
+	}
+	else if (obj["content"]["type"] == "Recipe") {
+		if (obj["content"]["foundItem"].get<bool>() == false) {
+			logs.push_back(ftxui::hflow({
+				ftxui::paragraph("Не найден предмет!") | ftxui::color(ENEMY_COLOR)
+				}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+		}
+		else {
+			if (obj["content"]["foundRecipe"].get<bool>() == false) {
+				logs.push_back(ftxui::hflow({
+					ftxui::paragraph("Этот предмет не крафтиться!") | ftxui::color(ENEMY_COLOR)
+				}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+				return;
+			}
+
+			std::vector<std::string> RecipeNames = obj["content"]["recipe"].get<std::vector<std::string>>();
+
+			logs.push_back(ftxui::hflow({
+				ftxui::paragraph("Рецепт этого предмета:") | ftxui::color(DECORATE_COLOR)
+			}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+
+			c = 1;
+
+			for (auto it : RecipeNames) {
+				logs.push_back(ftxui::hflow({
+					ftxui::paragraph(std::to_string(c) + ". " + it) | ftxui::color(ITEM_COLOR)
+					}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+				++c;
+			}
+		}
+		}
 }
 
 void addServerMsg(std::vector<ftxui::Element>& serverMessages, const nlohmann::json& obj) {

@@ -1791,7 +1791,7 @@ namespace Gigahrush {
 		return res.dump(); 
 	}
 
-	std::string Game::EnableCrafts(std::shared_ptr<Player> ply) {
+	std::string Game::EnableCrafts(std::shared_ptr<Player> ply, std::string arg) {
 		/*
 		std::string res = "Доступные крафты: ";
 
@@ -1829,8 +1829,60 @@ namespace Gigahrush {
 
 		return res;*/
 
+		std::vector<std::string> args;
+		std::stringstream ss(arg);
+		std::string argg;
+		std::string prefix;
+		ss >> prefix;
+
+		std::getline(ss >> std::ws, argg);
+
 		nlohmann::json res;
 		res["type"] = "ANSWER";
+		res["content"]["type"] = "";
+
+		if (prefix == "из") {
+			std::string item = argg;
+			int itemID = 0;
+			bool found = false;
+			res["content"]["type"] = "RecipesItem";
+			res["content"]["foundItem"] = false;
+			res["content"]["itemsToCraft"] = nlohmann::json::array();
+				
+			for (auto& it : configurator.config.items) {
+				if (it->name == item) {
+					itemID = it->ID;
+					res["content"]["foundItem"] = true;
+					found = true;
+					break;
+				}
+			}
+
+			if (found == true) {
+				std::vector<int> foundRecipes;
+				std::vector<std::string> foundRecipesNames;
+
+				for (auto it : configurator.config.crafts) {
+					for (auto itt : it.craft) {
+						if (itt == itemID) {
+							foundRecipes.push_back(it.ID);
+							break;
+						}
+					}
+				}
+
+				for (auto itt : foundRecipes) {
+					for (auto& it : configurator.config.items) {
+						if (itt == it->ID) {
+							foundRecipesNames.push_back(it->name);
+						}
+					}
+				}
+				res["content"]["itemsToCraft"] = foundRecipesNames;
+			}
+			return res.dump();
+		}
+
 		res["content"]["type"] = "Recipes";
 		res["content"]["enableCrafts"] = nlohmann::json::array();
 
@@ -2547,7 +2599,58 @@ namespace Gigahrush {
 			}
 		}
 
-		return res.dump(); 
+		return res.dump();
+	}
+
+	std::string Game::Recipe(std::shared_ptr<Player>, std::string arg) {
+		//Рецепт определенного предмета
+		nlohmann::json res;
+		res["type"] = "ANSWER";
+		res["content"]["type"] = "Recipe";
+
+		res["content"]["foundItem"] = false;
+		res["content"]["foundRecipe"] = false;
+
+		bool found = false;
+		res["content"]["recipe"] = nlohmann::json::array();
+
+		int itemID = 0;
+
+		std::vector<int> recipe;
+		std::vector<std::string> recipeNames;
+
+		for (auto& it : configurator.config.items) {
+			if (it->name == arg) {
+				itemID = it->ID;
+				res["content"]["foundItem"] = true;
+				found = true;
+				break;
+			}
+		}
+
+		if (found) {
+			for (auto it : configurator.config.crafts) {
+				if (it.ID == itemID) {
+					res["content"]["foundRecipe"] = true;
+					for (auto itt : it.craft) {
+						recipe.push_back(itt);
+					}
+					break;
+				}
+			}
+
+			for (auto itt : recipe) {
+				for (auto& it : configurator.config.items) {
+					if (itt == it->ID) {
+						recipeNames.push_back(it->name);
+					}
+				}
+			}
+
+			res["content"]["recipe"] = recipeNames;
+		}
+
+		return res.dump();
 	}
 
 	std::string Game::GetHelp(std::shared_ptr<Player> ply) {
@@ -2652,7 +2755,10 @@ namespace Gigahrush {
 		commandhandler.add("игроки", [this](std::shared_ptr<Player> ply) {return this->CurrentPlayers(ply); }, 0, true);
 
 		commandhandler.add("осмотреть", [this](std::shared_ptr<Player> ply, std::string arg) {return this->LookItem(ply, arg); }, 1, false);
-		commandhandler.add("рецепты", [this](std::shared_ptr<Player> ply) {return this->EnableCrafts(ply); }, 0, false);
+		
+		commandhandler.add("рецепты", [this](std::shared_ptr<Player> ply, std::string arg) {return this->EnableCrafts(ply, arg); }, 1, false);
+		commandhandler.add("рецепт", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Recipe(ply, arg); }, 1, false);
+
 		commandhandler.add("использовать", [this](std::shared_ptr<Player> ply, std::string arg) {return this->UseItem(ply, arg); }, 1, true);
 		commandhandler.add("починить", [this](std::shared_ptr<Player> ply, std::string arg) {return this->RepairExit(ply); }, 0, false);
 		commandhandler.add("помощь", [this](std::shared_ptr<Player> ply) { return this->GetHelp(ply);},0,true);
