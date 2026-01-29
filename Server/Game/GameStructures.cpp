@@ -298,11 +298,14 @@ namespace Gigahrush {
 					std::string phrase = "";
 
 					for (auto& itt : Game::Instance().configurator.config.roomDescs) {
-						if (itt.itemDescs.size() == 1) {
-							phrase = std::vformat(std::string_view(itt.itemDescs[0]), std::make_format_args(it->name));
-						}
-						else {
-							phrase = std::vformat(std::string_view(itt.itemDescs[rand() % (itt.itemDescs.size()-1)]), std::make_format_args(it->name));
+						if (itt.ID == ID) {
+							if (itt.itemDescs.size() == 1) {
+								phrase = std::vformat(std::string_view(itt.itemDescs[0]), std::make_format_args(it->name));
+							}
+							else {
+								phrase = std::vformat(std::string_view(itt.itemDescs[rand() % (itt.itemDescs.size() - 1)]), std::make_format_args(it->name));
+							}
+							break;
 						}
 					}
 
@@ -323,11 +326,14 @@ namespace Gigahrush {
 					std::string phrase = "";
 
 					for (auto& itt : Game::Instance().configurator.config.roomDescs) {
-						if (itt.enemiesDescs.size() == 1) {
-							phrase = std::vformat(std::string_view(itt.enemiesDescs[0]), std::make_format_args(it->name));
-						}
-						else {
-							phrase = std::vformat(std::string_view(itt.enemiesDescs[rand() % (itt.enemiesDescs.size()-1)]), std::make_format_args(it->name));
+						if (itt.ID == ID) {
+							if (itt.enemiesDescs.size() == 1) {
+								phrase = std::vformat(std::string_view(itt.enemiesDescs[0]), std::make_format_args(it->name));
+							}
+							else {
+								phrase = std::vformat(std::string_view(itt.enemiesDescs[rand() % (itt.enemiesDescs.size() - 1)]), std::make_format_args(it->name));
+							}
+							break;
 						}
 					}
 
@@ -347,6 +353,21 @@ namespace Gigahrush {
 			infile.read(reinterpret_cast<char*>(&itemID), sizeof(itemID));
 			for (auto& it : Game::Instance().configurator.config.items) {
 				if (itemID == it->ID) {
+					std::string phrase = "";
+
+					for (auto& itt : Game::Instance().configurator.config.roomDescs) {
+						if (itt.ID == ID) {
+							if (itt.itemDescs.size() == 1) {
+								phrase = std::vformat(std::string_view(itt.itemDescs[0]), std::make_format_args(it->name));
+							}
+							else {
+								phrase = std::vformat(std::string_view(itt.itemDescs[rand() % (itt.itemDescs.size() - 1)]), std::make_format_args(it->name));
+							}
+							break;
+						}
+					}
+
+					itemDescription.push_back(RoomDescElement(it->ID, phrase));
 					items.push_back(it->clone());
 				}
 			}
@@ -360,6 +381,21 @@ namespace Gigahrush {
 			infile.read(reinterpret_cast<char*>(&enemyID), sizeof(enemyID));
 			for (auto& it : Game::Instance().configurator.config.enemies) {
 				if (enemyID == it->ID) {
+					std::string phrase = "";
+
+					for (auto& itt : Game::Instance().configurator.config.roomDescs) {
+						if (itt.ID == ID) {
+							if (itt.enemiesDescs.size() == 1) {
+								phrase = std::vformat(std::string_view(itt.enemiesDescs[0]), std::make_format_args(it->name));
+							}
+							else {
+								phrase = std::vformat(std::string_view(itt.enemiesDescs[rand() % (itt.enemiesDescs.size() - 1)]), std::make_format_args(it->name));
+							}
+							break;
+						}
+					}
+
+					enemyDescription.push_back(RoomDescElement(it->ID, phrase));
 					enemies.push_back(it->clone());
 				}
 			}
