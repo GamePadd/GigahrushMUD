@@ -15,7 +15,12 @@ class Server {
 		asio::steady_timer timer2;
 		asio::steady_timer timer3;
 
+		asio::steady_timer autosave_timer;
+
 	public:
+		std::string autosave_filename;
+		bool autosaveGoing;
+
 		std::vector<std::weak_ptr<Session>> allSessions;
 		Server(asio::io_context& io_context, std::uint16_t port);
 		void newPlayerNotify(std::string);
@@ -29,6 +34,8 @@ class Server {
 		void waitSamosbor();
 		void startSamosbor();
 		void stopSamosbor(bool);
+
+		void autosave();
 
 		void checkPlayersSamosbor();
 

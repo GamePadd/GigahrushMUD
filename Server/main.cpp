@@ -168,6 +168,36 @@ void Terminal() {
 					std::cout << "Bad syntax!\n";
 				}
 			}
+			else if (words[0] == "autosave") {
+				if (words.size() >= 2) {
+					if (words[1] == "name") {
+						if (words.size() >= 3) {
+							if (srvv != nullptr) {
+								srvv->autosave_filename = words[2];
+								std::cout << "Autosave filename changed to " << words[2] << "\n";
+							}
+						}
+						else {
+							std::cout << "Bad syntax!\n";
+						}
+					}
+					else if (words[1] == "start") {
+						if (srvv != nullptr) {
+							std::cout << "Autosave started\n";
+							srvv->autosaveGoing = true;
+							srvv->autosave();
+						}
+					}
+					else if (words[1] == "stop") {
+						if (srvv != nullptr) {
+							srvv->autosaveGoing = false;
+						}
+					}
+				}
+				else {
+					std::cout << "Bad syntax!\n";
+				}
+			}
 		}
 	}
 }

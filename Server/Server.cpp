@@ -9,7 +9,10 @@ Server::Server(asio::io_context& io_context, std::uint16_t port) :
 	samosborDuringTimer(io_context),
 	samosborIntervalTimer(io_context),
 	timer2(io_context),
-	timer3(io_context) {}
+	timer3(io_context),
+	autosave_timer(io_context),
+	autosave_filename("autosave"),
+	autosaveGoing(false) {}
 
 void Server::async_accept() {
 	socket.emplace(io_context);
@@ -19,6 +22,25 @@ void Server::async_accept() {
 		ses->start();
 		allSessions.push_back(std::weak_ptr<Session>(ses));
 		async_accept();
+	});
+}
+
+void Server::autosave() {
+	autosave_timer.expires_after(asio::chrono::minutes(2));
+	autosave_timer.async_wait([this](const asio::error_code& ec) {
+		if (autosaveGoing == true) {
+			if (Gigahrush::Game::Instance().isGenerated == true) {
+				//std::cout << "Autosave to file " << autosave_filename << "\n";
+				Gigahrush::Game::Instance().SaveGame(autosave_filename);
+			}
+			else {
+				std::cout << "cant autosave, game is not generated\n";
+			}
+			autosave();
+		}
+		else {
+			std::cout << "Autosave stopped!\n";
+		}
 	});
 }
 
