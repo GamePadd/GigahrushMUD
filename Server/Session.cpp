@@ -130,6 +130,7 @@ void Session::read() {
 					std::size_t bt = asio::write(self->socket, asio::buffer(err.dump()));
 					self->buffer.resize(256);
 					self->firstTime(); 
+					return;
 				}
 
 				self->buffer.resize(bytes_received);
