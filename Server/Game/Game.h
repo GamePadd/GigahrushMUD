@@ -126,7 +126,7 @@ namespace Gigahrush {
 			std::string RepairExit(std::shared_ptr<Player>); // JSON Done
 			std::string CurrentPlayers(std::shared_ptr<Player>); // JSON Done
 			std::string GetHelp(std::shared_ptr<Player>);
-
+			std::string ChatMessage(std::shared_ptr<Player>, std::string);
 			//EndCommands
 
 			std::shared_ptr<Gigahrush::Player> SpawnPlayer(std::string&);

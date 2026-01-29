@@ -2728,6 +2728,16 @@ namespace Gigahrush {
 		return res.dump();
 	}
 
+	std::string Game::ChatMessage(std::shared_ptr<Player> ply, std::string msg) {
+		nlohmann::json res;
+		res["type"] = "ASNWER";
+		res["content"]["type"] = "MessageSend";
+
+		srv->sendChatMessage(ply, msg);
+
+		return res.dump();
+	}
+
 	void Game::LoadConfig() {
 		configurator.LoadConfig();
 		//add commands
@@ -2762,6 +2772,8 @@ namespace Gigahrush {
 		commandhandler.add("использовать", [this](std::shared_ptr<Player> ply, std::string arg) {return this->UseItem(ply, arg); }, 1, true);
 		commandhandler.add("починить", [this](std::shared_ptr<Player> ply, std::string arg) {return this->RepairExit(ply); }, 0, false);
 		commandhandler.add("помощь", [this](std::shared_ptr<Player> ply) { return this->GetHelp(ply);},0,true);
+
+		commandhandler.add("say", [this](std::shared_ptr<Player> ply, std::string arg) {return this->ChatMessage(ply, arg); }, 1, true);
 
 		commandhandler.add("атаковать", [this](std::shared_ptr<Player> ply) {return this->Attack(ply); }, 0, true);
 		commandhandler.add("битва", [this](std::shared_ptr<Player> ply, std::string arg) {return this->Battle(ply, arg); }, 1, false);
