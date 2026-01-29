@@ -135,10 +135,27 @@ void Session::read() {
 				self->buffer.resize(bytes_received);
 				//std::cout << "\n\nREAD DEBUG\n\n";
 				if (Gigahrush::Game::Instance().gamedata.players.size() != 0) {
-					std::string answer = self->game.ParseCommand(self->sessionPlayer.lock(), self->buffer);
-					std::size_t bt = asio::write(self->socket, asio::buffer(answer));
-					self->buffer.resize(256);
-					self->read();
+					//Char or parse
+
+					std::vector<std::string> args;
+					std::stringstream ss(self->buffer);
+					std::string commandS;
+					std::string argg;
+					ss >> commandS;
+
+					std::getline(ss >> std::ws, argg);
+
+					if (commandS == "say") {
+						self->srv->sendChatMessage(self->sessionPlayer.lock(), argg);
+						self->buffer.resize(256);
+						self->read();
+					}
+					else {
+						std::string answer = self->game.ParseCommand(self->sessionPlayer.lock(), self->buffer);
+						std::size_t bt = asio::write(self->socket, asio::buffer(answer));
+						self->buffer.resize(256);
+						self->read();
+					}
 				} 
 				else {
 					err["content"]["text"] = "Ваш игрок был утерян в результате рестарта сервера, попробуйте снова\nВведите ник: ";

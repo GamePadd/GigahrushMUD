@@ -20,6 +20,7 @@ class Server {
 		Server(asio::io_context& io_context, std::uint16_t port);
 		void newPlayerNotify(std::string);
 		void disconnectPlayerNotify(std::string);
+		void sendChatMessage(std::shared_ptr<Gigahrush::Player>, std::string);
 
 		void notifyAll(const std::string&);
 

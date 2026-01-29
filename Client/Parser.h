@@ -936,11 +936,18 @@ void addLog(std::vector<ftxui::Element>& logs, const nlohmann::json& obj) {
 			for (auto it : RecipeNames) {
 				logs.push_back(ftxui::hflow({
 					ftxui::paragraph(std::to_string(c) + ". " + it) | ftxui::color(ITEM_COLOR)
-					}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+				}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
 				++c;
 			}
 		}
-		}
+	}
+	else if (obj["content"]["type"] == "Message") {
+		logs.push_back(ftxui::hflow({
+			ftxui::text(obj["content"]["from"].get<std::string>()) | ftxui::color(ITEM_COLOR),
+			ftxui::text(" сказал: ") | ftxui::color(DECORATE_COLOR),
+			ftxui::paragraph(obj["content"]["msg"].get<std::string>()) | ftxui::color(ADD_COLOR1)
+		}) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50));
+	}
 }
 
 void addServerMsg(std::vector<ftxui::Element>& serverMessages, const nlohmann::json& obj) {

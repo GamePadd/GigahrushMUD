@@ -22,6 +22,30 @@ void Server::async_accept() {
 	});
 }
 
+void Server::sendChatMessage(std::shared_ptr<Gigahrush::Player> ply, std::string msg) {
+	nlohmann::json res;
+	res["type"] = "ANSWER";
+	res["content"]["type"] = "Message";
+	res["content"]["from"] = ply->username;
+	res["content"]["msg"] = msg;
+
+	for (auto& it : allSessions) {
+		if (auto p = it.lock()) {
+			if (p != nullptr) {
+				if (p->socket.is_open()) {
+					if (auto pl = p->sessionPlayer.lock()) {
+						if (pl != nullptr) {
+							if (pl->location == ply->location) {
+								asio::write(p->socket, asio::buffer(res.dump()));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 void Server::notifyAll(const std::string& obj) {
 	for (auto& it : allSessions) {
 		try {
