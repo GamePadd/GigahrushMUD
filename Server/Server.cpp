@@ -35,7 +35,7 @@ void Server::sendChatMessage(std::shared_ptr<Gigahrush::Player> ply, std::string
 				if (p->socket.is_open()) {
 					if (auto pl = p->sessionPlayer.lock()) {
 						if (pl != nullptr) {
-							if (pl->location == ply->location) {
+							if (pl->location->location.F == ply->location->location.F) {
 								asio::write(p->socket, asio::buffer(res.dump()));
 							}
 						}
